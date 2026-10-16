@@ -1,0 +1,163 @@
+<mxfile host="app.diagrams.net" agent="Claude Code" version="24.7.17">
+  <diagram id="diagrama-classes-projeto" name="Diagrama de Classes">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ================= Categoria ================= -->
+        <mxCell id="categoria" value="Categoria" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="300" height="162" as="geometry" />
+        </mxCell>
+        <mxCell id="categoria-atributos" value="- id: int&lt;br&gt;- nome: String&lt;br&gt;- limiteMensal: double" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="categoria">
+          <mxGeometry y="30" width="300" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="categoria-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="categoria">
+          <mxGeometry y="92" width="300" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="categoria-metodos" value="+ getNome(): String&lt;br&gt;+ getLimiteMensal(): double&lt;br&gt;+ calcularNivel(totalGasto: double): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="categoria">
+          <mxGeometry y="100" width="300" height="62" as="geometry" />
+        </mxCell>
+
+        <!-- ================= Despesa (RF1) ================= -->
+        <mxCell id="despesa" value="Despesa" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="420" y="40" width="300" height="162" as="geometry" />
+        </mxCell>
+        <mxCell id="despesa-atributos" value="- id: int&lt;br&gt;- descricao: String&lt;br&gt;- valor: double&lt;br&gt;- data: LocalDate&lt;br&gt;- categoria: Categoria" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="despesa">
+          <mxGeometry y="30" width="300" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="despesa-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="despesa">
+          <mxGeometry y="128" width="300" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="despesa-metodos" value="+ pertenceAoMes(mes: int, ano: int): boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="despesa">
+          <mxGeometry y="136" width="300" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- ================= Receita (RF2) ================= -->
+        <mxCell id="receita" value="Receita" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="820" y="40" width="300" height="162" as="geometry" />
+        </mxCell>
+        <mxCell id="receita-atributos" value="- id: int&lt;br&gt;- descricao: String&lt;br&gt;- valor: double&lt;br&gt;- data: LocalDate&lt;br&gt;- fonte: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="receita">
+          <mxGeometry y="30" width="300" height="98" as="geometry" />
+        </mxCell>
+        <mxCell id="receita-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="receita">
+          <mxGeometry y="128" width="300" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="receita-metodos" value="+ pertenceAoMes(mes: int, ano: int): boolean" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="receita">
+          <mxGeometry y="136" width="300" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- ================= ControleGastos (RF1–RF5) ================= -->
+        <mxCell id="controle" value="ControleGastos" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="420" y="300" width="440" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="controle-atributos" value="- despesas: List&amp;lt;Despesa&amp;gt;&lt;br&gt;- receitas: List&amp;lt;Receita&amp;gt;&lt;br&gt;- categorias: List&amp;lt;Categoria&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="controle">
+          <mxGeometry y="30" width="440" height="62" as="geometry" />
+        </mxCell>
+        <mxCell id="controle-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="controle">
+          <mxGeometry y="92" width="440" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="controle-metodos" value="+ registrarDespesa(despesa: Despesa): void&lt;br&gt;+ registrarReceita(receita: Receita): void&lt;br&gt;+ listarDespesas(): List&amp;lt;Despesa&amp;gt;&lt;br&gt;+ listarReceitas(): List&amp;lt;Receita&amp;gt;&lt;br&gt;+ totalPorCategoria(c: Categoria, mes: int, ano: int): double&lt;br&gt;+ totalDespesasMes(mes: int, ano: int): double&lt;br&gt;+ totalReceitasMes(mes: int, ano: int): double&lt;br&gt;+ calcularSaldo(mes: int, ano: int): double&lt;br&gt;+ verificarAlertas(mes: int, ano: int): List&amp;lt;Alerta&amp;gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="controle">
+          <mxGeometry y="100" width="440" height="170" as="geometry" />
+        </mxCell>
+
+        <!-- ================= Alerta (RF5) ================= -->
+        <mxCell id="alerta" value="Alerta" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="300" height="144" as="geometry" />
+        </mxCell>
+        <mxCell id="alerta-atributos" value="- categoria: String&lt;br&gt;- nivel: String&lt;br&gt;- percentualUsado: double&lt;br&gt;- mensagem: String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="alerta">
+          <mxGeometry y="30" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="alerta-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="alerta">
+          <mxGeometry y="110" width="300" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="alerta-metodos" value="+ getMensagem(): String" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="alerta">
+          <mxGeometry y="118" width="300" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- ================= FormatadorMoeda (RNF2) ================= -->
+        <mxCell id="formatador" value="FormatadorMoeda" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;html=1;fillColor=#FFFFFF;strokeColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="920" y="440" width="260" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="formatador-linha" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" vertex="1" parent="formatador">
+          <mxGeometry y="30" width="260" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="formatador-metodos" value="+ &lt;u&gt;formatar(valor: double): String&lt;/u&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;whiteSpace=wrap;" vertex="1" parent="formatador">
+          <mxGeometry y="38" width="260" height="26" as="geometry" />
+        </mxCell>
+
+        <!-- ================= Notas ================= -->
+        <mxCell id="nota-rf5" value="calcularNivel() retorna:&lt;br&gt;&quot;OK&quot; → abaixo de 80% do limite&lt;br&gt;&quot;ATENCAO&quot; → a partir de 80%&lt;br&gt;&quot;ESTOURADO&quot; → a partir de 100%" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#FFFFFF;strokeColor=#000000;align=left;spacingLeft=6;verticalAlign=top;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="nota-rnf2" value="Exibe valores no formato R$ 0,00&lt;br&gt;(ex.: 1250.9 → R$ 1.250,90)" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#FFFFFF;strokeColor=#000000;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="920" y="540" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ================= Relacionamentos ================= -->
+
+        <!-- Despesa * -> 1 Categoria -->
+        <mxCell id="r-despesa-categoria" style="endArrow=classic;endFill=1;html=1;rounded=0;exitX=0;exitY=0.4;exitDx=0;exitDy=0;entryX=1;entryY=0.4;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="despesa" target="categoria">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r-despesa-categoria-s" value="*" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="r-despesa-categoria">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint y="-4" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="r-despesa-categoria-t" value="1" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="r-despesa-categoria">
+          <mxGeometry x="0.7" relative="1" as="geometry"><mxPoint y="-4" as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ControleGastos 1 <>— * Despesa -->
+        <mxCell id="r-controle-despesa" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.341;entryY=0;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="despesa" target="controle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r-controle-despesa-s" value="*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=middle;" vertex="1" connectable="0" parent="r-controle-despesa">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint x="8" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="r-controle-despesa-t" value="1" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=middle;" vertex="1" connectable="0" parent="r-controle-despesa">
+          <mxGeometry x="0.5" relative="1" as="geometry"><mxPoint x="8" as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ControleGastos 1 <>— * Receita -->
+        <mxCell id="r-controle-receita" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.15;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="receita" target="controle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r-controle-receita-s" value="*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=middle;" vertex="1" connectable="0" parent="r-controle-receita">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint x="8" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="r-controle-receita-t" value="1" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="r-controle-receita">
+          <mxGeometry x="0.7" relative="1" as="geometry"><mxPoint y="-4" as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ControleGastos 1 <>— * Categoria -->
+        <mxCell id="r-controle-categoria" style="endArrow=diamondThin;endFill=1;endSize=14;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="categoria" target="controle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r-controle-categoria-s" value="*" style="edgeLabel;resizable=0;html=1;align=left;verticalAlign=middle;" vertex="1" connectable="0" parent="r-controle-categoria">
+          <mxGeometry x="-0.7" relative="1" as="geometry"><mxPoint x="8" as="offset" /></mxGeometry>
+        </mxCell>
+        <mxCell id="r-controle-categoria-t" value="1" style="edgeLabel;resizable=0;html=1;align=center;verticalAlign=bottom;" vertex="1" connectable="0" parent="r-controle-categoria">
+          <mxGeometry x="0.7" relative="1" as="geometry"><mxPoint y="-4" as="offset" /></mxGeometry>
+        </mxCell>
+
+        <!-- ControleGastos ..> Alerta «cria» -->
+        <mxCell id="r-controle-alerta" value="«cria»" style="endArrow=open;endFill=0;endSize=10;dashed=1;html=1;rounded=0;exitX=0;exitY=0.72;exitDx=0;exitDy=0;entryX=1;entryY=0.38;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="controle" target="alerta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- ControleGastos ..> FormatadorMoeda «usa» -->
+        <mxCell id="r-controle-formatador" value="«usa»" style="endArrow=open;endFill=0;endSize=10;dashed=1;html=1;rounded=0;exitX=1;exitY=0.637;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#000000;" edge="1" parent="1" source="controle" target="formatador">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Notas ligadas às classes -->
+        <mxCell id="r-nota-rf5" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;" edge="1" parent="1" source="nota-rf5" target="alerta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="r-nota-rnf2" style="endArrow=none;dashed=1;html=1;strokeColor=#000000;" edge="1" parent="1" source="nota-rnf2" target="formatador">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
