@@ -41,6 +41,62 @@ Depois acesse http://localhost:8080.
 O console do banco fica em http://localhost:8080/h2-console
 (JDBC URL: `jdbc:h2:file:./data/controle-gastos`, usuário `sa`, sem senha).
 
+## Telas e endpoints
+
+| Método | Caminho | O que faz |
+|---|---|---|
+| GET | `/despesas` | Página com a lista de despesas (valores em R$ 0,00) |
+| GET | `/despesas/nova` | Formulário de nova despesa |
+| POST | `/despesas` | Recebe o formulário, valida e salva |
+| GET | `/api/despesas` | Lista as despesas em JSON |
+| GET | `/api/despesas/{id}` | Uma despesa em JSON (404 se não existir) |
+| POST | `/api/despesas` | Cadastra uma despesa enviada em JSON (201) |
+| GET | `/api/categorias` | Lista as categorias em JSON |
+
+Na primeira execução o sistema cadastra as categorias Alimentação, Transporte e Lazer
+e duas despesas de exemplo.
+
+Exemplo de resposta de `GET /api/despesas`:
+
+```json
+[
+  {
+    "categoria": { "id": 1, "limiteMensal": 400.0, "nome": "Alimentação" },
+    "data": "2026-10-28",
+    "descricao": "Almoço RU",
+    "id": 1,
+    "valor": 12.5
+  }
+]
+```
+
+Exemplo de cadastro pela API:
+
+```
+curl -X POST http://localhost:8080/api/despesas -H "Content-Type: application/json" \
+  -d '{"descricao":"Cinema","valor":30.0,"data":"2026-10-29","categoria":{"id":3}}'
+```
+
+## Testes
+
+```
+mvnw.cmd test
+```
+
+Os testes usam um banco em memória separado, então não mexem nos dados de `./data`.
+
+## Progresso
+
+- [x] Tema, requisitos e diagramas UML
+- [x] Classes de domínio `Categoria` e `Despesa`, iguais ao diagrama de classes
+- [x] Controller com endpoint GET (`/api/despesas`), testado
+- [x] Formulário de nova despesa e POST
+- [ ] Receitas (RF2)
+- [ ] Totais por categoria, total do mês e saldo (RF4)
+- [ ] Alertas de 80% e 100% do limite (RF5)
+
+Evidências do teste (JSON e prints) em [`docs/evidencias/`](docs/evidencias).
+
 ## Documentação
 
 Os diagramas UML (abrir em https://app.diagrams.net) estão em [`docs/`](docs):
