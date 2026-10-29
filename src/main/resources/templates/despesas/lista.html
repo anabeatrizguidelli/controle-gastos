@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Despesas</title>
+	<link rel="stylesheet" th:href="@{/estilo.css}">
+</head>
+<body>
+<main>
+	<h1>Minhas despesas</h1>
+	<p><a class="botao" th:href="@{/despesas/nova}">+ Nova despesa</a></p>
+	<table>
+		<thead>
+			<tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>
+		</thead>
+		<tbody>
+			<tr th:each="d : ${despesas}">
+				<td th:text="${#temporals.format(d.data, 'dd/MM/yyyy')}">28/10/2026</td>
+				<td th:text="${d.descricao}">Almoço</td>
+				<td th:text="${d.categoria.nome}">Alimentação</td>
+				<td class="valor" th:text="|R$ ${#numbers.formatDecimal(d.valor, 1, 'POINT', 2, 'COMMA')}|">R$ 0,00</td>
+			</tr>
+			<tr th:if="${#lists.isEmpty(despesas)}">
+				<td colspan="4">Nenhuma despesa cadastrada.</td>
+			</tr>
+		</tbody>
+	</table>
+</main>
+</body>
+</html>
