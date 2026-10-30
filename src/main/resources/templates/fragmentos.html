@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<!-- Partes reaproveitadas por todas as páginas -->
+
+<head th:fragment="head(titulo)">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title th:text="${titulo} + ' · Controle de Gastos'">Controle de Gastos</title>
+	<!-- Aplica o tema salvo antes de desenhar a página (evita piscar). -->
+	<script>try { var t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+	<link rel="stylesheet" th:href="@{/estilo.css}">
+	<script th:src="@{/app.js}" defer></script>
+</head>
+
+<body>
+
+<aside th:fragment="menu(ativo)" class="lateral painel">
+	<div class="marca">
+		<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
+		<span><strong>Controle de Gastos</strong><small th:text="${usuarioNome}">Estudante</small></span>
+	</div>
+	<nav class="menu" aria-label="Menu principal">
+		<a th:href="@{/painel}" th:classappend="${ativo == 'painel'} ? 'ativo'" th:aria-current="${ativo == 'painel'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('painel')}"></th:block>Painel</a>
+		<a th:href="@{/despesas}" th:classappend="${ativo == 'despesas'} ? 'ativo'" th:aria-current="${ativo == 'despesas'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('despesa')}"></th:block>Despesas</a>
+		<a th:href="@{/receitas}" th:classappend="${ativo == 'receitas'} ? 'ativo'" th:aria-current="${ativo == 'receitas'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('receita')}"></th:block>Receitas</a>
+		<a th:href="@{/categorias}" th:classappend="${ativo == 'categorias'} ? 'ativo'" th:aria-current="${ativo == 'categorias'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('categorias')}"></th:block>Categorias</a>
+		<a th:href="@{/sugestoes}" th:classappend="${ativo == 'sugestoes'} ? 'ativo'" th:aria-current="${ativo == 'sugestoes'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('sugestoes')}"></th:block>Sugestões</a>
+		<a th:href="@{/fontes}" th:classappend="${ativo == 'fontes'} ? 'ativo'" th:aria-current="${ativo == 'fontes'} ? 'page'">
+			<th:block th:replace="~{fragmentos :: icone('fontes')}"></th:block>Fontes de receita</a>
+	</nav>
+	<th:block th:replace="~{fragmentos :: botaoTema('tema')}"></th:block>
+	<form class="sair" th:action="@{/logout}" method="post">
+		<button class="btn" type="submit"><th:block th:replace="~{fragmentos :: icone('sair')}"></th:block><span class="t">Sair</span></button>
+	</form>
+</aside>
+
+<!-- Alterna entre modo escuro e modo claro (app.js guarda a escolha). -->
+<button th:fragment="botaoTema(classe)" type="button" class="btn" th:classappend="${classe}" data-tema aria-label="Alternar entre modo escuro e modo claro">
+	<span data-tema-escuro><th:block th:replace="~{fragmentos :: icone('sol')}"></th:block><span class="t">Modo claro</span></span>
+	<span data-tema-claro hidden><th:block th:replace="~{fragmentos :: icone('lua')}"></th:block><span class="t">Modo escuro</span></span>
+</button>
+
+<th:block th:fragment="avisos">
+	<div id="toast" role="status" th:if="${sucesso}" th:text="${sucesso}">Salvo.</div>
+	<div class="aviso falha" role="alert" th:if="${erro}">
+		<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block><span th:text="${erro}">Erro</span>
+	</div>
+</th:block>
+
+<nav th:fragment="meses(url, mes)" class="meses painel" aria-label="Escolher mês">
+	<a th:href="@{${url}(mes=${mes.minusMonths(1)})}" title="Mês anterior" aria-label="Mês anterior">
+		<th:block th:replace="~{fragmentos :: icone('anterior')}"></th:block></a>
+	<span th:text="${@fmt.mes(mes)}">Outubro de 2026</span>
+	<a th:href="@{${url}(mes=${mes.plusMonths(1)})}" title="Próximo mês" aria-label="Próximo mês">
+		<th:block th:replace="~{fragmentos :: icone('proximo')}"></th:block></a>
+	<a th:href="@{${url}}" title="Voltar ao mês atual" aria-label="Voltar ao mês atual" style="border-left:1px solid var(--borda)">
+		<th:block th:replace="~{fragmentos :: icone('hoje')}"></th:block></a>
+</nav>
+
+<!-- Ícones (traço simples, mesmo estilo do protótipo) -->
+<th:block th:fragment="icone(nome)" th:switch="${nome}">
+	<svg th:case="'carteira'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12v4"/><path d="M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2z"/><circle cx="16" cy="14" r="1"/></svg>
+	<svg th:case="'painel'" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+	<svg th:case="'despesa'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+	<svg th:case="'receita'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+	<svg th:case="'categorias'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"/></svg>
+	<svg th:case="'fontes'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .9-3 2s1 1.7 3 2 3 .9 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6.5V8M12 16v1.5"/></svg>
+	<svg th:case="'sol'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+	<svg th:case="'lua'" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+	<svg th:case="'sugestoes'" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.2 1 2V17h6v-.3c0-.8.4-1.5 1-2A7 7 0 0 0 12 2z"/></svg>
+	<svg th:case="'tendencia'" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8M15 7h6v6"/></svg>
+	<svg th:case="'ok'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
+	<svg th:case="'sair'" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+	<svg th:case="'mais'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+	<svg th:case="'editar'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/></svg>
+	<svg th:case="'excluir'" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>
+	<svg th:case="'fechar'" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+	<svg th:case="'anterior'" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>
+	<svg th:case="'proximo'" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+	<svg th:case="'hoje'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>
+	<svg th:case="'alerta'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+	<svg th:case="'Alimentação'" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4 3v5a3 3 0 0 0 6 0V3M7 11v10"/><path d="M17 21V3c-2.5 1.5-4 4-4 7v3h4"/></svg>
+	<svg th:case="'Transporte'" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="14" rx="3"/><path d="M4 11h16M8 21v-4M16 21v-4"/></svg>
+	<svg th:case="'Lazer'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m10 8.5 5 3.5-5 3.5z"/></svg>
+	<svg th:case="*" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>
+</th:block>
+
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Ops')}"></head>
+<body>
+<th:block th:replace="~{fragmentos :: botaoTema('tema-flutuante')}"></th:block>
+<main class="entrada">
+	<section class="cartao painel">
+		<h1 th:text="${status == 404} ? 'Página não encontrada' : 'Algo deu errado'">Algo deu errado</h1>
+		<p class="suave" th:text="${status == 404}
+			? 'O endereço não existe ou o registro não pertence à sua conta.'
+			: 'Não foi possível concluir a operação. Tente novamente.'">Mensagem</p>
+		<p class="mono suave" th:text="'Código ' + ${status}">Código 500</p>
+		<a class="btn btn-p" th:href="@{/painel}">Voltar ao painel</a>
+	</section>
+</main>
+</body>
+</html>

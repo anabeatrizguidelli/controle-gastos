@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -36,8 +37,12 @@ public class Despesa {
 	private LocalDate data;
 
 	@NotNull(message = "Escolha uma categoria")
-	@ManyToOne(optional = false)
+	@ManyToOne
 	private Categoria categoria;
+
+	@JsonIgnore
+	@ManyToOne
+	private Usuario usuario;
 
 	@JsonCreator
 	public Despesa() {
@@ -48,6 +53,11 @@ public class Despesa {
 		this.valor = valor;
 		this.data = data;
 		this.categoria = categoria;
+	}
+
+	public Despesa(String descricao, double valor, LocalDate data, Categoria categoria, Usuario usuario) {
+		this(descricao, valor, data, categoria);
+		this.usuario = usuario;
 	}
 
 	public boolean pertenceAoMes(int mes, int ano) {
@@ -88,6 +98,14 @@ public class Despesa {
 
 	public void setCategoria(Categoria categoria) {
 		this.categoria = categoria;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 
 }

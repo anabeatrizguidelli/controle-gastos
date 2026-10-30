@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Painel')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('painel')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Painel</h1>
+				<p th:text="'Resumo financeiro de ' + ${@fmt.mes(mes).toLowerCase()}">Resumo financeiro</p>
+			</div>
+			<div class="acoes">
+				<nav th:replace="~{fragmentos :: meses('/painel', ${mes})}"></nav>
+				<a class="btn btn-p" th:href="@{/despesas/nova}"><th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova despesa</a>
+				<a class="btn" th:href="@{/receitas/nova}"><th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova receita</a>
+			</div>
+		</header>
+
+		<th:block th:replace="~{fragmentos :: avisos}"></th:block>
+
+		<section class="alertas" th:unless="${#lists.isEmpty(alertas)}" aria-label="Alertas de limite">
+			<div th:each="a : ${alertas}" class="alerta" th:classappend="${a.nivel}" role="status">
+				<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block><p th:text="${a.mensagem}">Alerta</p>
+			</div>
+		</section>
+
+		<section class="resumo painel" aria-label="Indicadores do mês">
+			<div><span class="rot">Saldo do mês anterior</span><strong class="num" th:classappend="${saldoAnterior < 0} ? 'neg'" th:text="${@fmt.moeda(saldoAnterior)}">R$ 0,00</strong>
+				<span class="det">Sobra acumulada até o fim de <th:block th:text="${@fmt.mes(mes.minusMonths(1)).toLowerCase()}">setembro</th:block></span></div>
+			<div><span class="rot">Receitas do mês</span><strong class="num pos" th:text="${@fmt.moeda(receitas)}">R$ 0,00</strong></div>
+			<div><span class="rot">Despesas do mês</span><strong class="num" th:text="${@fmt.moeda(despesas)}">R$ 0,00</strong></div>
+			<div><span class="rot">Saldo disponível</span><strong class="num" th:classappend="${saldoDisponivel < 0} ? 'neg' : 'pos'" th:text="${@fmt.moeda(saldoDisponivel)}">R$ 0,00</strong>
+				<span class="det">Saldo anterior + receitas − despesas</span></div>
+		</section>
+
+		<div class="grade2">
+			<section class="painel bloco" aria-labelledby="t-pizza">
+				<div class="bloco-topo"><h2 class="titulo" id="t-pizza">Despesas por categoria</h2></div>
+				<div class="pizza-area" th:if="${despesas > 0}">
+					<div class="pizza" th:style="'background:' + ${pizza}" role="img"
+						th:with="nomeMes=${@fmt.mes(mes)}" th:aria-label="'Gráfico de pizza das despesas de ' + ${nomeMes}">
+						<div class="pizza-centro"><small>Total</small><strong th:text="${@fmt.moeda(despesas)}">R$ 0,00</strong></div>
+					</div>
+					<ul class="legenda">
+						<li th:each="r : ${categorias}" th:if="${r.total > 0}" th:style="'--cor:' + ${r.cor}">
+							<span class="ponto"></span>
+							<span><span th:text="${r.categoria.nome}">Categoria</span> <span class="suave mono" th:text="'· ' + ${@fmt.pct(r.participacao)}">· 50%</span></span>
+							<span class="mono" th:text="${@fmt.moeda(r.total)}">R$ 0,00</span>
+						</li>
+					</ul>
+				</div>
+				<p class="suave" th:unless="${despesas > 0}">Nenhuma despesa neste mês.</p>
+			</section>
+
+			<section class="painel bloco" aria-labelledby="t-limites">
+				<div class="bloco-topo"><h2 class="titulo" id="t-limites">Limites por categoria</h2><a th:href="@{/categorias}" class="suave">Gerenciar</a></div>
+				<ul class="cats">
+					<li th:each="r : ${categorias}" class="cat" th:classappend="${r.nivel}" th:style="'--cor:' + ${r.cor}">
+						<span class="ic"><th:block th:replace="~{fragmentos :: icone(${r.categoria.nome})}"></th:block></span>
+						<span th:text="${r.categoria.nome}">Categoria</span>
+						<span class="v mono" th:text="${@fmt.moeda(r.total)}">R$ 0,00</span>
+						<span class="barra" aria-hidden="true"><i th:style="'width:' + ${r.percentualLimite > 100 ? 100 : r.percentualLimite} + '%'"></i></span>
+						<span class="ex" th:text="${@fmt.pct(r.percentualLimite)} + ' de ' + ${@fmt.moeda(r.categoria.limiteMensal)}">0% de R$ 0,00</span>
+					</li>
+				</ul>
+				<p class="suave" th:if="${#lists.isEmpty(categorias)}">Nenhuma categoria. <a th:href="@{/categorias}">Crie a primeira</a>.</p>
+			</section>
+		</div>
+
+		<section class="painel bloco" aria-labelledby="t-hist">
+			<div class="bloco-topo">
+				<h2 class="titulo" id="t-hist">Resumo mensal (últimos 6 meses)</h2>
+				<div class="chaves"><span><i class="b-rec"></i>Receitas</span><span><i class="b-des"></i>Despesas</span></div>
+			</div>
+			<div class="colunas">
+				<a th:each="h : ${historico}" class="coluna" th:classappend="${h.mes == mes} ? 'atual'"
+					th:href="@{/painel(mes=${h.mes})}"
+					th:title="${@fmt.mes(h.mes)} + ': receitas ' + ${@fmt.moeda(h.receitas)} + ', despesas ' + ${@fmt.moeda(h.despesas)} + ', saldo ' + ${@fmt.moeda(h.saldo)}">
+					<span class="par-barras">
+						<i class="b-rec" th:style="'height:' + ${h.receitas / maiorDoHistorico * 100} + '%'"></i>
+						<i class="b-des" th:style="'height:' + ${h.despesas / maiorDoHistorico * 100} + '%'"></i>
+					</span>
+					<small th:text="${@fmt.mesCurto(h.mes)}">out/26</small>
+				</a>
+			</div>
+			<ul class="lancamentos">
+				<li class="lan" style="grid-template-columns:minmax(0,1fr) auto">
+					<span th:text="'Resultado de ' + ${@fmt.mes(mes).toLowerCase()} + ' (receitas − despesas)'">Resultado do mês</span>
+					<span class="val mono" th:classappend="${saldo < 0} ? 'neg' : 'pos'"
+						th:text="${@fmt.moeda(receitas)} + ' − ' + ${@fmt.moeda(despesas)} + ' = ' + ${@fmt.moeda(saldo)}">R$ 0,00</span>
+				</li>
+				<li class="lan" style="grid-template-columns:minmax(0,1fr) auto;font-weight:600">
+					<span>Saldo disponível (com o que sobrou dos meses anteriores)</span>
+					<span class="val mono" th:classappend="${saldoDisponivel < 0} ? 'neg' : 'pos'"
+						th:text="${@fmt.moeda(saldoAnterior)} + ' + ' + ${@fmt.moeda(saldo)} + ' = ' + ${@fmt.moeda(saldoDisponivel)}">R$ 0,00</span>
+				</li>
+			</ul>
+		</section>
+
+		<div class="grade2">
+			<section class="painel" aria-labelledby="t-ult-d">
+				<div class="lista-topo"><h2 class="titulo" id="t-ult-d">Últimas despesas</h2><a th:href="@{/despesas(mes=${mes})}" class="suave">Ver todas</a></div>
+				<ul class="lancamentos">
+					<li th:each="d : ${ultimasDespesas}" class="lan" style="grid-template-columns:36px minmax(0,1fr) auto">
+						<span class="ic" th:style="'--cor:' + ${@fmt.cor(d.categoria)}"><th:block th:replace="~{fragmentos :: icone(${d.categoria.nome})}"></th:block></span>
+						<div><span class="d" th:text="${d.descricao}">Descrição</span><span class="s" th:text="${d.categoria.nome} + ' · ' + ${@fmt.data(d.data)}">Categoria</span></div>
+						<span class="val mono" th:text="${@fmt.moeda(d.valor)}">R$ 0,00</span>
+					</li>
+					<li class="vazio" th:if="${#lists.isEmpty(ultimasDespesas)}">Nenhuma despesa neste mês.</li>
+				</ul>
+			</section>
+			<section class="painel" aria-labelledby="t-ult-r">
+				<div class="lista-topo"><h2 class="titulo" id="t-ult-r">Últimas receitas</h2><a th:href="@{/receitas(mes=${mes})}" class="suave">Ver todas</a></div>
+				<ul class="lancamentos">
+					<li th:each="r : ${ultimasReceitas}" class="lan cor-r" style="grid-template-columns:36px minmax(0,1fr) auto">
+						<span class="ic"><th:block th:replace="~{fragmentos :: icone('receita')}"></th:block></span>
+						<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s" th:text="${r.fonte.nome} + ' · ' + ${@fmt.data(r.data)}">Fonte</span></div>
+						<span class="val mono pos" th:text="'+' + ${@fmt.moeda(r.valor)}">R$ 0,00</span>
+					</li>
+					<li class="vazio" th:if="${#lists.isEmpty(ultimasReceitas)}">Nenhuma receita neste mês.</li>
+				</ul>
+			</section>
+		</div>
+	</main>
+</div>
+</body>
+</html>

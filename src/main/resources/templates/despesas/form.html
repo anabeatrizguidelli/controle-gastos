@@ -1,37 +1,70 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Nova despesa</title>
-	<link rel="stylesheet" th:href="@{/estilo.css}">
-</head>
+<head th:replace="~{fragmentos :: head(${idEdicao == null} ? 'Nova despesa' : 'Editar despesa')}"></head>
 <body>
-<main>
-	<h1>Nova despesa</h1>
-	<form th:action="@{/despesas}" th:object="${despesa}" method="post">
-		<label>Descrição
-			<input type="text" th:field="*{descricao}" placeholder="Ex.: Almoço no RU">
-			<span class="erro" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></span>
-		</label>
-		<label>Valor (R$)
-			<input type="number" step="0.01" min="0.01" th:field="*{valor}">
-			<span class="erro" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></span>
-		</label>
-		<label>Data
-			<input type="date" th:field="*{data}">
-			<span class="erro" th:if="${#fields.hasErrors('data')}" th:errors="*{data}"></span>
-		</label>
-		<label>Categoria
-			<select th:field="*{categoria}">
-				<option value="">Selecione...</option>
-				<option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}">Alimentação</option>
-			</select>
-			<span class="erro" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></span>
-		</label>
-		<button type="submit">Salvar</button>
-		<a th:href="@{/despesas}">Voltar para a lista</a>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('despesas')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1 th:text="${idEdicao == null} ? 'Nova despesa' : 'Editar despesa'">Nova despesa</h1>
+				<p>Os totais e alertas do painel são atualizados ao salvar.</p>
+			</div>
+		</header>
+
+		<form class="form painel" th:object="${despesa}" method="post"
+			th:action="${idEdicao == null} ? @{/despesas} : @{/despesas/{id}(id=${idEdicao})}">
+			<label>Descrição
+				<input th:field="*{descricao}" placeholder="Ex.: Almoço no RU" autocomplete="off" maxlength="120"
+					th:errorclass="invalido">
+				<span class="erro" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></span>
+			</label>
+			<div class="par">
+				<label>Valor (R$)
+					<input id="valor" name="valor" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0,00"
+						th:value="${@fmt.campo(despesa.valor)}" th:classappend="${#fields.hasErrors('valor')} ? 'invalido'">
+					<span class="erro" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></span>
+				</label>
+				<label>Data
+					<input type="date" th:field="*{data}" th:errorclass="invalido">
+					<span class="erro" th:if="${#fields.hasErrors('data')}" th:errors="*{data}"></span>
+				</label>
+			</div>
+			<div class="rotulo">
+				<label for="categoria">Categoria</label>
+				<div class="com-botao">
+					<select th:field="*{categoria}" th:errorclass="invalido">
+						<option value="">Selecione…</option>
+						<option th:each="c : ${categorias}" th:value="${c.id}" th:text="${c.nome}">Alimentação</option>
+					</select>
+					<button class="btn" type="button" data-rapido="dlg-categoria" title="Cadastrar nova categoria sem sair desta tela">
+						<th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova</button>
+				</div>
+				<span class="erro" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></span>
+			</div>
+			<div class="form-acoes">
+				<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Salvar despesa' : 'Salvar alterações'">Salvar despesa</button>
+				<a class="btn" th:href="@{/despesas}">Cancelar</a>
+			</div>
+		</form>
+
+		<form th:if="${idEdicao != null}" th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
+			data-confirmar="Excluir esta despesa? Essa ação não pode ser desfeita.">
+			<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Excluir despesa</button>
+		</form>
+	</main>
+</div>
+
+<dialog id="dlg-categoria" aria-labelledby="t-dlg-cat">
+	<form class="dl" data-api="/api/categorias" data-select="categoria" data-sucesso="Categoria &quot;{nome}&quot; criada e selecionada.">
+		<div class="dl-topo"><h2 id="t-dlg-cat">Nova categoria</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<label>Nome<input name="nome" required maxlength="40" autocomplete="off" placeholder="Ex.: Material escolar"></label>
+		<label>Limite mensal (R$)<input name="limiteMensal" type="number" step="0.01" min="0.01" required placeholder="0,00"></label>
+		<span class="erro"></span>
+		<div class="form-acoes"><button class="btn btn-p" type="submit">Criar categoria</button><button class="btn" type="button" data-fechar>Cancelar</button></div>
 	</form>
-</main>
+</dialog>
 </body>
 </html>

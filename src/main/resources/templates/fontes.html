@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Fontes de receita')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('fontes')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Fontes de receita</h1>
+				<p>De onde vem o seu dinheiro: mesada, bolsa, estágio, vendas…</p>
+			</div>
+		</header>
+
+		<th:block th:replace="~{fragmentos :: avisos}"></th:block>
+
+		<section class="painel" aria-labelledby="t-form">
+			<div class="lista-topo"><h2 class="titulo" id="t-form" th:text="${idEdicao == null} ? 'Nova fonte' : 'Editar fonte'">Nova fonte</h2></div>
+			<form class="form-linha" style="grid-template-columns:minmax(0,1fr) auto" th:object="${fonte}" method="post"
+				th:action="${idEdicao == null} ? @{/fontes} : @{/fontes/{id}(id=${idEdicao})}">
+				<label>Nome
+					<input th:field="*{nome}" placeholder="Ex.: Serviços extras" maxlength="40" autocomplete="off" th:errorclass="invalido"
+						th:autofocus="${idEdicao != null}">
+					<span class="erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+				</label>
+				<div class="acoes">
+					<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Criar' : 'Salvar'">Criar</button>
+					<a class="btn" th:if="${idEdicao != null}" th:href="@{/fontes}">Cancelar</a>
+				</div>
+			</form>
+		</section>
+
+		<section class="painel" aria-labelledby="t-lista">
+			<div class="lista-topo">
+				<h2 class="titulo" id="t-lista">Fontes cadastradas</h2>
+				<span class="suave mono" th:text="${#lists.size(fontes)} + (${#lists.size(fontes) == 1} ? ' fonte' : ' fontes')">0</span>
+			</div>
+			<ul class="lancamentos">
+				<li th:each="f : ${fontes}" class="lan cor-r" style="grid-template-columns:36px minmax(0,1fr) auto"
+					th:styleappend="${f.id == idEdicao} ? 'background:var(--hover)'">
+					<span class="ic"><th:block th:replace="~{fragmentos :: icone('fontes')}"></th:block></span>
+					<span class="d" th:text="${f.nome}">Fonte</span>
+					<span class="botoes">
+						<a class="x" th:href="@{/fontes/{id}/editar(id=${f.id})}" title="Editar" th:aria-label="'Editar ' + ${f.nome}">
+							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
+						<form th:action="@{/fontes/{id}/excluir(id=${f.id})}" method="post"
+							th:data-confirmar="'Excluir a fonte &quot;' + ${f.nome} + '&quot;?'">
+							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${f.nome}">
+								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
+						</form>
+					</span>
+				</li>
+				<li class="vazio" th:if="${#lists.isEmpty(fontes)}">Nenhuma fonte ainda. Crie a primeira acima.</li>
+			</ul>
+		</section>
+	</main>
+</div>
+</body>
+</html>

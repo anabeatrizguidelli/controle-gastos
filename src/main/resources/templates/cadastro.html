@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Criar conta')}"></head>
+<body>
+<th:block th:replace="~{fragmentos :: botaoTema('tema-flutuante')}"></th:block>
+<main class="entrada">
+	<section class="cartao painel" aria-labelledby="titulo-cadastro">
+		<div class="marca">
+			<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
+			<span><strong>Controle de Gastos</strong><small>Finanças do estudante</small></span>
+		</div>
+		<div>
+			<h1 id="titulo-cadastro">Criar conta</h1>
+			<p class="suave">Sua conta já vem com algumas categorias e fontes para começar.</p>
+		</div>
+
+		<div class="aviso falha" role="alert" th:if="${erro}">
+			<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block><span th:text="${erro}">Erro</span>
+		</div>
+
+		<form th:action="@{/cadastro}" method="post">
+			<label>Nome
+				<input name="nome" th:value="${nome}" autocomplete="name" required maxlength="60">
+			</label>
+			<label>E-mail
+				<input name="email" type="email" th:value="${email}" autocomplete="email" required>
+			</label>
+			<div class="par">
+				<label>Senha
+					<input name="senha" type="password" autocomplete="new-password" required minlength="6" placeholder="Mín. 6 caracteres">
+				</label>
+				<label>Confirmar senha
+					<input name="confirmacao" type="password" autocomplete="new-password" required minlength="6">
+				</label>
+			</div>
+			<button class="btn btn-p" type="submit">Criar conta</button>
+		</form>
+
+		<p class="suave">Já tem conta? <a th:href="@{/login}">Entrar</a></p>
+	</section>
+</main>
+</body>
+</html>

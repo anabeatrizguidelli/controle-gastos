@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head(${idEdicao == null} ? 'Nova receita' : 'Editar receita')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('receitas')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1 th:text="${idEdicao == null} ? 'Nova receita' : 'Editar receita'">Nova receita</h1>
+				<p>O saldo do painel é atualizado ao salvar.</p>
+			</div>
+		</header>
+
+		<form class="form painel" th:object="${receita}" method="post"
+			th:action="${idEdicao == null} ? @{/receitas} : @{/receitas/{id}(id=${idEdicao})}">
+			<label>Descrição
+				<input th:field="*{descricao}" placeholder="Ex.: Mesada de novembro" autocomplete="off" maxlength="120"
+					th:errorclass="invalido">
+				<span class="erro" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></span>
+			</label>
+			<div class="par">
+				<label>Valor (R$)
+					<input id="valor" name="valor" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0,00"
+						th:value="${@fmt.campo(receita.valor)}" th:classappend="${#fields.hasErrors('valor')} ? 'invalido'">
+					<span class="erro" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></span>
+				</label>
+				<label>Data de recebimento
+					<input type="date" th:field="*{data}" th:errorclass="invalido">
+					<span class="erro" th:if="${#fields.hasErrors('data')}" th:errors="*{data}"></span>
+				</label>
+			</div>
+			<div class="rotulo">
+				<label for="fonte">Fonte</label>
+				<div class="com-botao">
+					<select th:field="*{fonte}" th:errorclass="invalido">
+						<option value="">Selecione…</option>
+						<option th:each="f : ${fontes}" th:value="${f.id}" th:text="${f.nome}">Mesada</option>
+					</select>
+					<button class="btn" type="button" data-rapido="dlg-fonte" title="Cadastrar nova fonte sem sair desta tela">
+						<th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova</button>
+				</div>
+				<span class="erro" th:if="${#fields.hasErrors('fonte')}" th:errors="*{fonte}"></span>
+			</div>
+			<div class="form-acoes">
+				<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Salvar receita' : 'Salvar alterações'">Salvar receita</button>
+				<a class="btn" th:href="@{/receitas}">Cancelar</a>
+			</div>
+		</form>
+
+		<form th:if="${idEdicao != null}" th:action="@{/receitas/{id}/excluir(id=${idEdicao})}" method="post"
+			data-confirmar="Excluir esta receita? Essa ação não pode ser desfeita.">
+			<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Excluir receita</button>
+		</form>
+	</main>
+</div>
+
+<dialog id="dlg-fonte" aria-labelledby="t-dlg-fonte">
+	<form class="dl" data-api="/api/fontes" data-select="fonte" data-sucesso="Fonte &quot;{nome}&quot; criada e selecionada.">
+		<div class="dl-topo"><h2 id="t-dlg-fonte">Nova fonte de receita</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<label>Nome<input name="nome" required maxlength="40" autocomplete="off" placeholder="Ex.: Serviços extras"></label>
+		<span class="erro"></span>
+		<div class="form-acoes"><button class="btn btn-p" type="submit">Criar fonte</button><button class="btn" type="button" data-fechar>Cancelar</button></div>
+	</form>
+</dialog>
+</body>
+</html>

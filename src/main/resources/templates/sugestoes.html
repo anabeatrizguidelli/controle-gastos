@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Sugestões')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('sugestoes')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Sugestões</h1>
+				<p>Onde você está gastando mais e o que dá para melhorar.</p>
+			</div>
+			<div class="acoes">
+				<nav th:replace="~{fragmentos :: meses('/sugestoes', ${mes})}"></nav>
+			</div>
+		</header>
+
+		<section class="numeros painel" aria-label="Números do mês">
+			<div><span>Gasto médio por dia</span><strong th:text="${@fmt.moeda(analise.mediaDiaria)}">R$ 0,00</strong></div>
+			<div><span>Categoria com mais gastos</span><strong th:text="${analise.maiorCategoria} ?: '—'">Lazer</strong></div>
+			<div><span>Quanto sobrou do que recebeu</span>
+				<strong th:if="${analise.taxaEconomia != null}" th:classappend="${analise.taxaEconomia < 0} ? 'neg' : 'pos'"
+					th:text="${@fmt.pct(analise.taxaEconomia)}">20%</strong>
+				<strong th:unless="${analise.taxaEconomia != null}" class="suave">sem receitas</strong></div>
+		</section>
+
+		<div class="grade2" style="align-items:start">
+			<section aria-labelledby="t-sug">
+				<h2 class="titulo" id="t-sug" style="margin-bottom:12px">Recomendações para <th:block th:text="${@fmt.mes(mes).toLowerCase()}">outubro</th:block></h2>
+				<ul class="sugestoes">
+					<li th:each="s : ${analise.sugestoes}" class="sugestao painel" th:classappend="${s.tipo}">
+						<span class="ic"><th:block th:replace="~{fragmentos :: icone(${s.icone})}"></th:block></span>
+						<div><h3 th:text="${s.titulo}">Título</h3><p th:text="${s.texto}">Texto</p></div>
+					</li>
+				</ul>
+			</section>
+
+			<section class="painel bloco" aria-labelledby="t-rank">
+				<div class="bloco-topo"><h2 class="titulo" id="t-rank">Onde vai o seu dinheiro</h2>
+					<a th:href="@{/despesas(mes=${mes})}" class="suave">Ver despesas</a></div>
+				<ul class="ranking">
+					<li th:each="r : ${analise.ranking}" th:style="'--cor:' + ${r.resumo.cor}">
+						<span><strong th:text="${r.resumo.categoria.nome}">Categoria</strong>
+							<small th:text="' · ' + ${@fmt.pct(r.resumo.participacao)} + ' das despesas'">· 50%</small></span>
+						<span class="mono" th:text="${@fmt.moeda(r.resumo.total)}">R$ 0,00</span>
+						<span class="barra" aria-hidden="true"><i th:style="'width:' + ${r.resumo.participacao} + '%'"></i></span>
+						<small th:if="${r.variacao != null}" th:classappend="${r.variacao > 0} ? 'neg' : 'pos'"
+							th:text="(${r.variacao > 0} ? '▲ ' : '▼ ') + ${@fmt.pct(r.variacao > 0 ? r.variacao : -r.variacao)} + ' em relação ao mês anterior (' + ${@fmt.moeda(r.mesAnterior)} + ')'">▲ 10%</small>
+						<small th:unless="${r.variacao != null}">sem gastos no mês anterior</small>
+					</li>
+				</ul>
+				<p class="suave" th:if="${#lists.isEmpty(analise.ranking)}">Nenhuma despesa neste mês.</p>
+			</section>
+		</div>
+	</main>
+</div>
+</body>
+</html>

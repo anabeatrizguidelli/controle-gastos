@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Entrar')}"></head>
+<body>
+<th:block th:replace="~{fragmentos :: botaoTema('tema-flutuante')}"></th:block>
+<main class="entrada">
+	<section class="cartao painel" aria-labelledby="titulo-login">
+		<div class="marca">
+			<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
+			<span><strong>Controle de Gastos</strong><small>Finanças do estudante</small></span>
+		</div>
+		<div>
+			<h1 id="titulo-login">Entrar</h1>
+			<p class="suave">Acesse com seu e-mail e senha.</p>
+		</div>
+
+		<div class="aviso falha" role="alert" th:if="${param.erro}">
+			<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block>E-mail ou senha inválidos.
+		</div>
+		<div class="aviso sucesso" role="status" th:if="${param.saiu}">Você saiu do sistema.</div>
+		<div class="aviso sucesso" role="status" th:if="${sucesso}" th:text="${sucesso}">Conta criada.</div>
+
+		<form id="form-login" th:action="@{/login}" method="post" novalidate>
+			<label>E-mail
+				<input id="email" name="email" type="email" autocomplete="username" placeholder="voce@exemplo.com"
+					data-obrigatorio="Informe seu e-mail." autofocus>
+				<span class="erro" id="email-erro"></span>
+			</label>
+			<label>Senha
+				<input id="senha" name="senha" type="password" autocomplete="current-password" placeholder="Sua senha"
+					data-obrigatorio="Informe sua senha.">
+				<span class="erro" id="senha-erro"></span>
+			</label>
+			<button class="btn btn-p" type="submit">Entrar</button>
+		</form>
+
+		<p class="suave">Ainda não tem conta? <a th:href="@{/cadastro}">Criar conta</a></p>
+		<p class="dica">Conta de demonstração: <span class="mono">estudante@exemplo.com</span> / <span class="mono">senha123</span></p>
+	</section>
+</main>
+</body>
+</html>

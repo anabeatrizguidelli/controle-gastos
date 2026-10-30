@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Receitas')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('receitas')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Receitas</h1>
+				<p>Dinheiro recebido no mês selecionado.</p>
+			</div>
+			<div class="acoes">
+				<nav th:replace="~{fragmentos :: meses('/receitas', ${mes})}"></nav>
+				<a class="btn btn-p" th:href="@{/receitas/nova}"><th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova receita</a>
+			</div>
+		</header>
+
+		<th:block th:replace="~{fragmentos :: avisos}"></th:block>
+
+		<section class="painel" aria-labelledby="t-lista">
+			<div class="lista-topo">
+				<h2 class="titulo" id="t-lista" th:text="'Receitas de ' + ${@fmt.mes(mes).toLowerCase()}">Receitas</h2>
+				<span class="suave mono" th:text="${#lists.size(receitas)} + (${#lists.size(receitas) == 1} ? ' lançamento' : ' lançamentos')">0 lançamentos</span>
+			</div>
+			<ul class="lancamentos">
+				<li th:each="r : ${receitas}" class="lan cor-r">
+					<span class="ic"><th:block th:replace="~{fragmentos :: icone('receita')}"></th:block></span>
+					<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s" th:text="${r.fonte.nome}">Fonte</span></div>
+					<span class="dt" th:text="${@fmt.data(r.data)}">01/01/2026</span>
+					<span class="val mono pos" th:text="'+' + ${@fmt.moeda(r.valor)}">R$ 0,00</span>
+					<span class="botoes">
+						<a class="x" th:href="@{/receitas/{id}/editar(id=${r.id})}" title="Editar" th:aria-label="'Editar ' + ${r.descricao}">
+							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
+						<form th:action="@{/receitas/{id}/excluir(id=${r.id})}" method="post"
+							th:with="valorFmt=${@fmt.moeda(r.valor)}" th:data-confirmar="'Excluir a receita &quot;' + ${r.descricao} + '&quot; (' + ${valorFmt} + ')?'">
+							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${r.descricao}">
+								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
+						</form>
+					</span>
+				</li>
+				<li class="vazio" th:if="${#lists.isEmpty(receitas)}">
+					Nenhuma receita em <span th:text="${@fmt.mes(mes).toLowerCase()}">outubro</span>.
+					<a th:href="@{/receitas/nova}">Registre a primeira</a>.
+				</li>
+			</ul>
+			<div class="rodape-lista" th:unless="${#lists.isEmpty(receitas)}">
+				<span>Total do mês</span><span class="mono pos" th:text="${@fmt.moeda(total)}">R$ 0,00</span>
+			</div>
+		</section>
+	</main>
+</div>
+</body>
+</html>

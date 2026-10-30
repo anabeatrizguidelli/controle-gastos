@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head('Categorias')}"></head>
+<body>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('categorias')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Categorias</h1>
+				<p>O limite mensal define quando aparecem os avisos de 80% e 100% no painel.</p>
+			</div>
+		</header>
+
+		<th:block th:replace="~{fragmentos :: avisos}"></th:block>
+
+		<section class="painel" aria-labelledby="t-form">
+			<div class="lista-topo"><h2 class="titulo" id="t-form" th:text="${idEdicao == null} ? 'Nova categoria' : 'Editar categoria'">Nova categoria</h2></div>
+			<form class="form-linha" th:object="${categoria}" method="post"
+				th:action="${idEdicao == null} ? @{/categorias} : @{/categorias/{id}(id=${idEdicao})}">
+				<label>Nome
+					<input th:field="*{nome}" placeholder="Ex.: Material escolar" maxlength="40" autocomplete="off" th:errorclass="invalido"
+						th:autofocus="${idEdicao != null}">
+					<span class="erro" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}"></span>
+				</label>
+				<label>Limite mensal (R$)
+					<input id="limiteMensal" name="limiteMensal" type="number" step="0.01" min="0.01" placeholder="0,00"
+						th:value="${@fmt.campo(categoria.limiteMensal)}" th:classappend="${#fields.hasErrors('limiteMensal')} ? 'invalido'">
+					<span class="erro" th:if="${#fields.hasErrors('limiteMensal')}" th:errors="*{limiteMensal}"></span>
+				</label>
+				<div class="acoes">
+					<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Criar' : 'Salvar'">Criar</button>
+					<a class="btn" th:if="${idEdicao != null}" th:href="@{/categorias}">Cancelar</a>
+				</div>
+			</form>
+		</section>
+
+		<section class="painel" aria-labelledby="t-lista">
+			<div class="lista-topo">
+				<h2 class="titulo" id="t-lista">Categorias cadastradas</h2>
+				<span class="suave mono" th:text="${#lists.size(categorias)} + (${#lists.size(categorias) == 1} ? ' categoria' : ' categorias')">0</span>
+			</div>
+			<ul class="lancamentos">
+				<li th:each="c : ${categorias}" class="lan" style="grid-template-columns:36px minmax(0,1fr) auto auto"
+					th:styleappend="${c.id == idEdicao} ? 'background:var(--hover)'">
+					<span class="ic" th:style="'--cor:' + ${@fmt.cor(c)}"><th:block th:replace="~{fragmentos :: icone(${c.nome})}"></th:block></span>
+					<div><span class="d" th:text="${c.nome}">Categoria</span><span class="s">Limite mensal</span></div>
+					<span class="val mono" th:text="${@fmt.moeda(c.limiteMensal)}">R$ 0,00</span>
+					<span class="botoes">
+						<a class="x" th:href="@{/categorias/{id}/editar(id=${c.id})}" title="Editar" th:aria-label="'Editar ' + ${c.nome}">
+							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
+						<form th:action="@{/categorias/{id}/excluir(id=${c.id})}" method="post"
+							th:data-confirmar="'Excluir a categoria &quot;' + ${c.nome} + '&quot;?'">
+							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${c.nome}">
+								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
+						</form>
+					</span>
+				</li>
+				<li class="vazio" th:if="${#lists.isEmpty(categorias)}">Nenhuma categoria ainda. Crie a primeira acima.</li>
+			</ul>
+		</section>
+	</main>
+</div>
+</body>
+</html>

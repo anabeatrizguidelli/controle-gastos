@@ -1,13 +1,16 @@
 package br.com.controlegastos.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 
 /**
  * Categoria de despesa (ex.: Alimentação, Transporte) com um limite de gasto mensal.
@@ -19,11 +22,16 @@ public class Categoria {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@NotBlank
+	@NotBlank(message = "Informe o nome da categoria")
+	@Size(max = 40, message = "Use no máximo 40 caracteres")
 	private String nome;
 
-	@Positive
+	@Positive(message = "O limite deve ser maior que zero")
 	private double limiteMensal;
+
+	@JsonIgnore
+	@ManyToOne
+	private Usuario usuario;
 
 	@JsonCreator
 	public Categoria() {
@@ -32,6 +40,11 @@ public class Categoria {
 	public Categoria(String nome, double limiteMensal) {
 		this.nome = nome;
 		this.limiteMensal = limiteMensal;
+	}
+
+	public Categoria(String nome, double limiteMensal, Usuario usuario) {
+		this(nome, limiteMensal);
+		this.usuario = usuario;
 	}
 
 	/**
@@ -71,6 +84,14 @@ public class Categoria {
 
 	public void setLimiteMensal(double limiteMensal) {
 		this.limiteMensal = limiteMensal;
+	}
+
+	public Usuario getUsuario() {
+		return usuario;
+	}
+
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 
 }

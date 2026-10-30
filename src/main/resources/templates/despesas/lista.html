@@ -1,31 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Despesas</title>
-	<link rel="stylesheet" th:href="@{/estilo.css}">
-</head>
+<head th:replace="~{fragmentos :: head('Despesas')}"></head>
 <body>
-<main>
-	<h1>Minhas despesas</h1>
-	<p><a class="botao" th:href="@{/despesas/nova}">+ Nova despesa</a></p>
-	<table>
-		<thead>
-			<tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Valor</th></tr>
-		</thead>
-		<tbody>
-			<tr th:each="d : ${despesas}">
-				<td th:text="${#temporals.format(d.data, 'dd/MM/yyyy')}">28/10/2026</td>
-				<td th:text="${d.descricao}">Almoço</td>
-				<td th:text="${d.categoria.nome}">Alimentação</td>
-				<td class="valor" th:text="|R$ ${#numbers.formatDecimal(d.valor, 1, 'POINT', 2, 'COMMA')}|">R$ 0,00</td>
-			</tr>
-			<tr th:if="${#lists.isEmpty(despesas)}">
-				<td colspan="4">Nenhuma despesa cadastrada.</td>
-			</tr>
-		</tbody>
-	</table>
-</main>
+<div class="app">
+	<aside th:replace="~{fragmentos :: menu('despesas')}"></aside>
+
+	<main class="conteudo">
+		<header class="cabecalho">
+			<div>
+				<h1>Despesas</h1>
+				<p>Gastos lançados no mês selecionado.</p>
+			</div>
+			<div class="acoes">
+				<nav th:replace="~{fragmentos :: meses('/despesas', ${mes})}"></nav>
+				<a class="btn btn-p" th:href="@{/despesas/nova}"><th:block th:replace="~{fragmentos :: icone('mais')}"></th:block>Nova despesa</a>
+			</div>
+		</header>
+
+		<th:block th:replace="~{fragmentos :: avisos}"></th:block>
+
+		<section class="painel" aria-labelledby="t-lista">
+			<div class="lista-topo">
+				<h2 class="titulo" id="t-lista" th:text="'Despesas de ' + ${@fmt.mes(mes).toLowerCase()}">Despesas</h2>
+				<span class="suave mono" th:text="${#lists.size(despesas)} + (${#lists.size(despesas) == 1} ? ' lançamento' : ' lançamentos')">0 lançamentos</span>
+			</div>
+			<ul class="lancamentos">
+				<li th:each="d : ${despesas}" class="lan">
+					<span class="ic" th:style="'--cor:' + ${@fmt.cor(d.categoria)}"><th:block th:replace="~{fragmentos :: icone(${d.categoria.nome})}"></th:block></span>
+					<div><span class="d" th:text="${d.descricao}">Descrição</span><span class="s" th:text="${d.categoria.nome}">Categoria</span></div>
+					<span class="dt" th:text="${@fmt.data(d.data)}">01/01/2026</span>
+					<span class="val mono" th:text="${@fmt.moeda(d.valor)}">R$ 0,00</span>
+					<span class="botoes">
+						<a class="x" th:href="@{/despesas/{id}/editar(id=${d.id})}" title="Editar" th:aria-label="'Editar ' + ${d.descricao}">
+							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
+						<form th:action="@{/despesas/{id}/excluir(id=${d.id})}" method="post"
+							th:with="valorFmt=${@fmt.moeda(d.valor)}" th:data-confirmar="'Excluir a despesa &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')?'">
+							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${d.descricao}">
+								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
+						</form>
+					</span>
+				</li>
+				<li class="vazio" th:if="${#lists.isEmpty(despesas)}">
+					Nenhuma despesa em <span th:text="${@fmt.mes(mes).toLowerCase()}">outubro</span>.
+					<a th:href="@{/despesas/nova}">Registre a primeira</a>.
+				</li>
+			</ul>
+			<div class="rodape-lista" th:unless="${#lists.isEmpty(despesas)}">
+				<span>Total do mês</span><span class="mono" th:text="${@fmt.moeda(total)}">R$ 0,00</span>
+			</div>
+		</section>
+	</main>
+</div>
 </body>
 </html>
