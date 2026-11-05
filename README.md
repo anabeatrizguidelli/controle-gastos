@@ -1,7 +1,23 @@
 # Controle de Gastos
 
+## Descrição
 Aplicação web para estudantes universitários acompanharem os próprios gastos
 (mesada, bolsa, estágio), com avisos quando estiverem perto do limite mensal.
+
+## Tecnologias utilizadas
+- Java 21 e Spring Boot 4 (Web MVC, Thymeleaf, Data JPA, Validation, Security)
+- HTML e CSS
+- JavaScript
+- Banco H2 (em arquivo)
+- Maven (via Maven Wrapper — não precisa instalar)
+
+## Integrantes
+- Ana Beatriz Guidelli
+- Gabriella Silva
+- Victor Hugo Machado Leal
+- Tiago Alves Ayala
+- Douglas William Barbosa de Oliveira
+- Henrique Rikelme de Lima Dias
 
 ## Requisitos
 
@@ -15,13 +31,6 @@ Aplicação web para estudantes universitários acompanharem os próprios gastos
 **Não funcionais**
 - RNF1. Interface legível em tela de celular.
 - RNF2. Valores monetários no formato R$ 0,00.
-
-## Tecnologias
-
-- Java 21+
-- Spring Boot 4 (Web MVC, Thymeleaf, Data JPA, Validation, Security, DevTools)
-- Banco H2 (em arquivo)
-- Maven (via Maven Wrapper — não precisa instalar)
 
 ## Como executar
 
