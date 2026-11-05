@@ -13,11 +13,11 @@ Aplicação web para estudantes universitários acompanharem os próprios gastos
 
 ## Integrantes
 - Ana Beatriz Guidelli
-- Gabriella Silva
-- Victor Hugo Machado Leal
-- Tiago Alves Ayala
 - Douglas William Barbosa de Oliveira
+- Gabriella Silva
 - Henrique Rikelme de Lima Dias
+- Tiago Alves Ayala
+- Victor Hugo Machado Leal
 
 ## Requisitos
 
