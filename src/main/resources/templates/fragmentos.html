@@ -5,7 +5,7 @@
 <head th:fragment="head(titulo)">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title th:text="${titulo} + ' · Controle de Gastos'">Controle de Gastos</title>
+	<title th:text="${titulo} + ' · Finora'">Finora</title>
 	<!-- Aplica o tema salvo antes de desenhar a página (evita piscar). -->
 	<script>try { var t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 	<link rel="stylesheet" th:href="@{/estilo.css}">
@@ -17,7 +17,7 @@
 <aside th:fragment="menu(ativo)" class="lateral painel">
 	<div class="marca">
 		<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
-		<span><strong>Controle de Gastos</strong><small th:text="${usuarioNome}">Estudante</small></span>
+		<span><strong>Finora</strong><small th:text="${usuarioNome}">Estudante</small></span>
 	</div>
 	<nav class="menu" aria-label="Menu principal">
 		<a th:href="@{/painel}" th:classappend="${ativo == 'painel'} ? 'ativo'" th:aria-current="${ativo == 'painel'} ? 'page'">
