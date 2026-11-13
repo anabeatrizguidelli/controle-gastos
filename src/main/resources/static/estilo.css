@@ -219,6 +219,12 @@ input.invalido, select.invalido { border-color: var(--terracota-500); }
 .form-acoes .btn-p { flex: 1; }
 .form-linha { display: grid; grid-template-columns: minmax(0, 1fr) 150px auto; gap: 10px; align-items: start; padding: 4px 24px 22px; }
 .form-linha .btn { margin-top: 24px; height: 46px; }
+.form-linha.com-limite { grid-template-columns: minmax(0, 1fr) auto 150px auto; }
+/* Opção liga/desliga (ex.: limite da categoria), no mesmo estilo dos campos. */
+label.opcao { flex-direction: row; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; background: var(--campo); border: 1px solid var(--borda2); border-radius: 12px; font-size: .8rem; cursor: pointer; white-space: nowrap; }
+.form-linha label.opcao { margin-top: 24px; }
+label.opcao input { width: 18px; height: 18px; margin: 0; padding: 0; flex: none; accent-color: var(--terracota-500); cursor: pointer; box-shadow: none; }
+label.opcao:has(input:checked) { border-color: var(--terracota-300); }
 
 /* ---------- avisos ---------- */
 .aviso { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; border: 1px solid; font-size: .875rem; font-weight: 500; }

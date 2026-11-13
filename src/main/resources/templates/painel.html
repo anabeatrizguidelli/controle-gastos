@@ -67,8 +67,11 @@
 						<span class="ic"><th:block th:replace="~{fragmentos :: icone(${r.categoria.nome})}"></th:block></span>
 						<span th:text="${r.categoria.nome}">Categoria</span>
 						<span class="v mono" th:text="${@fmt.moeda(r.total)}">R$ 0,00</span>
+						<th:block th:if="${r.categoria.temLimite}">
 						<span class="barra" aria-hidden="true"><i th:style="'width:' + ${r.percentualLimite > 100 ? 100 : r.percentualLimite} + '%'"></i></span>
 						<span class="ex" th:text="${@fmt.pct(r.percentualLimite)} + ' de ' + ${@fmt.moeda(r.categoria.limiteMensal)}">0% de R$ 0,00</span>
+						</th:block>
+						<span class="ex" th:unless="${r.categoria.temLimite}">Sem limite de gastos</span>
 					</li>
 				</ul>
 				<p class="suave" th:if="${#lists.isEmpty(categorias)}">Nenhuma categoria. <a th:href="@{/categorias}">Crie a primeira</a>.</p>

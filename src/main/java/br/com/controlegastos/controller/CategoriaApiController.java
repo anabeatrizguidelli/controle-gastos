@@ -42,7 +42,7 @@ public class CategoriaApiController {
 	public ResponseEntity<?> criar(@Valid @RequestBody Categoria categoria, BindingResult erros) {
 		Usuario usuario = usuarioAtual.get();
 		categoria.setId(null);
-		categorias.validarNome(categoria, usuario, erros);
+		categorias.validar(categoria, usuario, erros);
 		if (erros.hasErrors()) {
 			return ResponseEntity.badRequest().body(Map.of("erro", erros.getFieldErrors().get(0).getDefaultMessage()));
 		}

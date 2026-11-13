@@ -108,7 +108,8 @@
 		<div class="dl-topo"><h2 id="t-dlg-cat">Nova categoria</h2>
 			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
 		<label>Nome<input name="nome" required maxlength="40" autocomplete="off" placeholder="Ex.: Material escolar"></label>
-		<label>Limite mensal (R$)<input name="limiteMensal" type="number" step="0.01" min="0.01" required placeholder="0,00"></label>
+		<label class="opcao"><input type="checkbox" name="temLimite" value="true" data-limite>Definir limite máximo de gastos</label>
+		<label data-limite-valor hidden>Limite mensal (R$)<input name="limiteMensal" type="number" step="0.01" min="0.01" required disabled placeholder="0,00"></label>
 		<span class="erro"></span>
 		<div class="form-acoes"><button class="btn btn-p" type="submit">Criar categoria</button><button class="btn" type="button" data-fechar>Cancelar</button></div>
 	</form>

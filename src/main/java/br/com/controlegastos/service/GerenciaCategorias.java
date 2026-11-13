@@ -33,8 +33,14 @@ public class GerenciaCategorias {
 		return categorias.findByIdAndUsuario(id, usuario);
 	}
 
-	/** Recusa nome repetido (ignorando maiúsculas) entre as categorias do usuário. */
-	public void validarNome(Categoria categoria, Usuario usuario, Errors erros) {
+	/**
+	 * Recusa nome repetido (ignorando maiúsculas) entre as categorias do usuário
+	 * e exige um valor maior que zero quando o limite máximo estiver ativado.
+	 */
+	public void validar(Categoria categoria, Usuario usuario, Errors erros) {
+		if (categoria.getTemLimite() && categoria.getLimiteMensal() <= 0 && !erros.hasFieldErrors("limiteMensal")) {
+			erros.rejectValue("limiteMensal", "limiteObrigatorio", "Informe um limite maior que zero");
+		}
 		String nome = categoria.getNome() == null ? "" : categoria.getNome().trim();
 		boolean repetido = categoria.getId() == null
 				? categorias.existsByUsuarioAndNomeIgnoreCase(usuario, nome)
@@ -45,13 +51,19 @@ public class GerenciaCategorias {
 	}
 
 	public Categoria criar(Categoria categoria, Usuario usuario) {
-		return categorias.save(new Categoria(categoria.getNome().trim(), categoria.getLimiteMensal(), usuario));
+		return categorias.save(new Categoria(categoria.getNome().trim(), limiteDe(categoria), usuario));
 	}
 
 	public Categoria atualizar(Categoria existente, Categoria dados) {
 		existente.setNome(dados.getNome().trim());
-		existente.setLimiteMensal(dados.getLimiteMensal());
+		existente.setLimiteMensal(limiteDe(dados));
+		existente.setTemLimite(null);
 		return categorias.save(existente);
+	}
+
+	/** Sem limite ativado, grava 0 (sem limite), mesmo que algum valor tenha sido enviado. */
+	private static double limiteDe(Categoria dados) {
+		return dados.getTemLimite() ? dados.getLimiteMensal() : 0;
 	}
 
 	/** @return mensagem de erro, ou {@code null} se excluiu. */

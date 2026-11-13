@@ -45,6 +45,19 @@
 		});
 	}
 
+	// Categoria: a opção "Definir limite máximo de gastos" mostra/esconde o campo do valor.
+	// Campo escondido fica desativado, então não é enviado nem validado pelo navegador.
+	function limite(chk) {
+		const campo = chk.form.querySelector('[data-limite-valor]');
+		if (!campo) return;
+		campo.hidden = !chk.checked;
+		campo.querySelector('input').disabled = !chk.checked;
+	}
+	document.querySelectorAll('[data-limite]').forEach(chk => {
+		limite(chk);
+		chk.addEventListener('change', () => { limite(chk); if (chk.checked) chk.form.querySelector('[data-limite-valor] input').focus(); });
+	});
+
 	// Cadastro rápido: abre o diálogo, envia para a API e já seleciona o item criado.
 	document.querySelectorAll('[data-rapido]').forEach(botao => {
 		const dialogo = document.getElementById(botao.dataset.rapido);
@@ -52,7 +65,7 @@
 		const select = document.getElementById(form.dataset.select);
 		const erro = form.querySelector('.erro');
 
-		botao.addEventListener('click', () => { form.reset(); erro.textContent = ''; dialogo.showModal(); form.querySelector('input').focus(); });
+		botao.addEventListener('click', () => { form.reset(); form.querySelectorAll('[data-limite]').forEach(limite); erro.textContent = ''; dialogo.showModal(); form.querySelector('input').focus(); });
 		dialogo.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dialogo.close()));
 		dialogo.addEventListener('click', e => { if (e.target === dialogo) dialogo.close(); });
 
@@ -60,6 +73,7 @@
 			e.preventDefault();
 			const dados = {};
 			new FormData(form).forEach((v, k) => dados[k] = k === 'limiteMensal' ? parseFloat(String(v).replace(',', '.')) || 0 : v);
+			if (form.elements.temLimite) dados.temLimite = form.elements.temLimite.checked;
 			try {
 				const resp = await fetch(form.dataset.api, {
 					method: 'POST', credentials: 'same-origin',

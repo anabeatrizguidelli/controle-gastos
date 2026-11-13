@@ -1,5 +1,7 @@
 package br.com.controlegastos.controller;
 
+import java.beans.PropertyEditorSupport;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,7 +46,7 @@ public class CategoriaController {
 	public String criar(@Valid @ModelAttribute("categoria") Categoria categoria, BindingResult erros, Model model,
 			RedirectAttributes redirect) {
 		Usuario usuario = usuarioAtual.get();
-		categorias.validarNome(categoria, usuario, erros);
+		categorias.validar(categoria, usuario, erros);
 		if (erros.hasErrors()) {
 			return pagina(categoria, null, model);
 		}
@@ -63,7 +65,7 @@ public class CategoriaController {
 			BindingResult erros, Model model, RedirectAttributes redirect) {
 		Categoria existente = buscar(id);
 		dados.setId(id);
-		categorias.validarNome(dados, existente.getUsuario(), erros);
+		categorias.validar(dados, existente.getUsuario(), erros);
 		if (erros.hasErrors()) {
 			return pagina(dados, id, model);
 		}
@@ -86,7 +88,14 @@ public class CategoriaController {
 
 	@InitBinder
 	void camposPermitidos(WebDataBinder binder) {
-		binder.setAllowedFields("nome", "limiteMensal");
+		binder.setAllowedFields("nome", "limiteMensal", "temLimite");
+		// Campo de limite vazio (categoria sem limite) vira 0 em vez de erro de conversão.
+		binder.registerCustomEditor(double.class, "limiteMensal", new PropertyEditorSupport() {
+			@Override
+			public void setAsText(String texto) {
+				setValue(texto == null || texto.isBlank() ? 0d : Double.parseDouble(texto.trim().replace(',', '.')));
+			}
+		});
 	}
 
 	private String pagina(Categoria categoria, Integer id, Model model) {
