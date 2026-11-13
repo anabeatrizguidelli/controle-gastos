@@ -147,7 +147,7 @@
 				<ul class="lancamentos">
 					<li th:each="r : ${ultimasReceitas}" class="lan cor-r" style="grid-template-columns:36px minmax(0,1fr) auto">
 						<span class="ic"><th:block th:replace="~{fragmentos :: icone('receita')}"></th:block></span>
-						<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s" th:text="${r.fonte.nome} + ' · ' + ${@fmt.data(r.data)}">Fonte</span></div>
+						<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s" th:text="${r.fonte.nome} + ' · ' + ${@fmt.data(r.data)}">Fonte</span><span class="selo-fixa" th:if="${r.fixa}">Fixa</span></div>
 						<span class="val mono pos" th:text="'+' + ${@fmt.moeda(r.valor)}">R$ 0,00</span>
 					</li>
 					<li class="vazio" th:if="${#lists.isEmpty(ultimasReceitas)}">Nenhuma receita neste mês.</li>

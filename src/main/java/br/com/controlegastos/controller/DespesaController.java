@@ -32,7 +32,7 @@ import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.CadastroDespesas;
 import br.com.controlegastos.service.ControleGastos;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 import br.com.controlegastos.service.GerenciaCategorias;
 import br.com.controlegastos.service.GeradorParcelas;
 import jakarta.servlet.http.HttpSession;
@@ -53,11 +53,11 @@ public class DespesaController {
 	private final GerenciaCategorias categorias;
 	private final ControleGastos controle;
 	private final CadastroDespesas cadastro;
-	private final DespesasFixas fixas;
+	private final LancamentosFixos fixas;
 	private final UsuarioAtual usuarioAtual;
 
 	public DespesaController(DespesaRepository despesas, GerenciaCategorias categorias, ControleGastos controle,
-			CadastroDespesas cadastro, DespesasFixas fixas, UsuarioAtual usuarioAtual) {
+			CadastroDespesas cadastro, LancamentosFixos fixas, UsuarioAtual usuarioAtual) {
 		this.despesas = despesas;
 		this.categorias = categorias;
 		this.controle = controle;

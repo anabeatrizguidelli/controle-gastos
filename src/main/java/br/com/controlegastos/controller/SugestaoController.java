@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.AnaliseGastos;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 
 /**
  * Aba "Sugestões": onde a pessoa mais gasta e como pode melhorar.
@@ -20,10 +20,10 @@ import br.com.controlegastos.service.DespesasFixas;
 public class SugestaoController {
 
 	private final AnaliseGastos analise;
-	private final DespesasFixas fixas;
+	private final LancamentosFixos fixas;
 	private final UsuarioAtual usuarioAtual;
 
-	public SugestaoController(AnaliseGastos analise, DespesasFixas fixas, UsuarioAtual usuarioAtual) {
+	public SugestaoController(AnaliseGastos analise, LancamentosFixos fixas, UsuarioAtual usuarioAtual) {
 		this.analise = analise;
 		this.fixas = fixas;
 		this.usuarioAtual = usuarioAtual;

@@ -243,6 +243,14 @@ label.opcao:has(input:checked) { border-color: var(--terracota-300); }
 :root[data-theme="dark"] .projecao-final.sobra { background: rgba(53, 68, 56, .45); border-color: var(--capim-700); color: var(--capim-200); }
 :root[data-theme="dark"] .projecao-final.falta { background: rgba(123, 60, 43, .25); border-color: var(--terracota-800); color: var(--terracota-300); }
 @media (max-width: 760px) { .projecao-corpo { grid-template-columns: 1fr; } .projecao-final strong { font-size: 1.4rem; } }
+/* Janela de exclusão de receita fixa: duas escolhas simples e a opção destrutiva separada. */
+.escolhas { display: flex; flex-direction: column; gap: 8px; }
+.escolhas .btn { height: auto; min-height: 46px; padding: 10px 14px; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; }
+.escolhas .btn small { font-weight: 400; font-size: .75rem; color: var(--suave); }
+.zona-perigo { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px dashed var(--terracota-300); border-radius: 14px; }
+:root[data-theme="dark"] .zona-perigo { border-color: var(--terracota-800); }
+.zona-perigo label.opcao { white-space: normal; padding: 10px 14px; }
+.zona-perigo .btn-perigo:disabled { opacity: .5; cursor: not-allowed; }
 /* Selo discreto de despesa fixa (mensal). */
 .selo-fixa { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 99px; border: 1px solid var(--capim-300); background: var(--capim-100); color: var(--capim-700); font-size: .66rem; font-weight: 600; line-height: 1.5; vertical-align: 1px; }
 :root[data-theme="dark"] .selo-fixa { background: rgba(53, 68, 56, .5); border-color: var(--capim-700); color: var(--capim-200); }

@@ -30,7 +30,7 @@ import br.com.controlegastos.repository.ReceitaRepository;
 import br.com.controlegastos.service.CadastroDespesas;
 import br.com.controlegastos.service.CadastroUsuario;
 import br.com.controlegastos.service.ControleGastos;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 
 /**
  * Painel: saldo projetado ao final do mês = receitas do mês − todas as despesas
@@ -66,7 +66,7 @@ class SaldoProjetadoTests {
 	private CadastroDespesas cadastro;
 
 	@Autowired
-	private DespesasFixas fixas;
+	private LancamentosFixos fixas;
 
 	@Autowired
 	private ControleGastos controle;

@@ -17,7 +17,7 @@
 			th:action="${idEdicao == null} ? @{/despesas} : @{/despesas/{id}(id=${idEdicao})}"
 			th:data-valor-original="${valorOriginal}">
 			<input type="hidden" name="chaveFormulario" th:if="${idEdicao == null}" th:value="${chaveFormulario}">
-			<input type="hidden" id="aplicarDemaisPendentes" name="aplicarDemaisPendentes" value="false"
+			<input type="hidden" id="aplicarDemaisPendentes" name="aplicarDemaisPendentes" value="false" data-aplicar-campo
 				th:if="${idEdicao != null and perguntarDemais}">
 			<p class="info-parcela" th:if="${original != null and original.fixa}">
 				<span class="selo-fixa">Fixa</span>
@@ -104,7 +104,7 @@
 	</main>
 </div>
 
-<dialog id="dlg-demais-parcelas" th:if="${idEdicao != null and perguntarDemais and original.fixa}" aria-labelledby="t-dlg-fixa">
+<dialog id="dlg-demais-parcelas" data-pergunta-demais th:if="${idEdicao != null and perguntarDemais and original.fixa}" aria-labelledby="t-dlg-fixa">
 	<div class="dl">
 		<div class="dl-topo"><h2 id="t-dlg-fixa">Alterar os próximos meses?</h2>
 			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
@@ -117,7 +117,7 @@
 	</div>
 </dialog>
 
-<dialog id="dlg-demais-parcelas" th:if="${idEdicao != null and outrasPendentes > 0}" aria-labelledby="t-dlg-parcelas">
+<dialog id="dlg-demais-parcelas" data-pergunta-demais th:if="${idEdicao != null and outrasPendentes > 0}" aria-labelledby="t-dlg-parcelas">
 	<div class="dl">
 		<div class="dl-topo"><h2 id="t-dlg-parcelas">Alterar as demais parcelas?</h2>
 			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>

@@ -108,13 +108,15 @@
 	// Edição de parcela: se o valor mudou e a compra tem outras parcelas pendentes,
 	// pergunta se o novo valor vale também para elas (Sim/Não) antes de salvar.
 	// Precisa vir antes do "enviar uma vez" para que o botão não fique desativado.
-	const dlgParcelas = $('#dlg-demais-parcelas'), formDespesa = $('#form-despesa'), aplicar = $('#aplicarDemaisPendentes');
-	if (dlgParcelas && formDespesa && aplicar && formDespesa.dataset.valorOriginal) {
+	// Vale também para despesas e receitas fixas ("só este mês" ou "os próximos meses").
+	const dlgParcelas = $('dialog[data-pergunta-demais]'), formDespesa = $('form[data-valor-original]');
+	const aplicar = formDespesa && formDespesa.querySelector('[data-aplicar-campo]');
+	if (dlgParcelas && formDespesa && aplicar) {
 		const centavosDe = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100);
 		let decidido = false;
 		formDespesa.addEventListener('submit', e => {
 			if (decidido) return;
-			const novo = centavosDe($('#valor').value);
+			const novo = centavosDe(formDespesa.querySelector('[name="valor"]').value);
 			if (!(novo > 0) || novo === centavosDe(formDespesa.dataset.valorOriginal)) { aplicar.value = 'false'; return; }
 			e.preventDefault();
 			dlgParcelas.querySelector('[data-novo-valor]').textContent =
@@ -130,6 +132,24 @@
 		// Fechar (X, Esc ou clique fora) cancela: nada é salvo e o formulário continua aberto.
 		dlgParcelas.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dlgParcelas.close()));
 		dlgParcelas.addEventListener('click', e => { if (e.target === dlgParcelas) dlgParcelas.close(); });
+	}
+
+	// Receita fixa: o botão de excluir abre a janela de escolha (só este mês, este e os
+	// seguintes, ou tudo). "Excluir tudo" só libera depois de marcar a confirmação.
+	const dlgExcluir = $('#dlg-excluir-fixa');
+	if (dlgExcluir) {
+		const formEscolha = dlgExcluir.querySelector('form'), tudo = dlgExcluir.querySelector('[data-tudo]'),
+			ciente = dlgExcluir.querySelector('[data-ciente]');
+		document.querySelectorAll('form[data-excluir-fixa]').forEach(f => f.addEventListener('submit', e => {
+			e.preventDefault();
+			formEscolha.action = f.action;
+			dlgExcluir.querySelector('[data-nome]').textContent = f.dataset.excluirFixa;
+			ciente.checked = false; tudo.disabled = true;
+			dlgExcluir.showModal();
+		}));
+		ciente.addEventListener('change', () => tudo.disabled = !ciente.checked);
+		dlgExcluir.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dlgExcluir.close()));
+		dlgExcluir.addEventListener('click', e => { if (e.target === dlgExcluir) dlgExcluir.close(); });
 	}
 
 	// Evita clique duplo no "Salvar" (o servidor também ignora o mesmo formulário enviado duas vezes).

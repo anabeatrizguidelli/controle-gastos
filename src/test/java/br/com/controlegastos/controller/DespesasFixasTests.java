@@ -32,7 +32,7 @@ import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.repository.RecorrenciaRepository;
 import br.com.controlegastos.service.CadastroUsuario;
 import br.com.controlegastos.service.ControleGastos;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 
 /**
  * Despesas fixas (mensais): cada mês vira um lançamento próprio, sem duplicar,
@@ -63,7 +63,7 @@ class DespesasFixasTests {
 	private RecorrenciaRepository recorrencias;
 
 	@Autowired
-	private DespesasFixas fixas;
+	private LancamentosFixos fixas;
 
 	@Autowired
 	private ControleGastos controle;
@@ -180,7 +180,7 @@ class DespesasFixasTests {
 	void naoGeraMesesFuturosSemLimite() throws Exception {
 		criarInternet("2030-01-10");
 		fixas.lancarAte(usuario, YearMonth.of(2040, 1), YearMonth.of(2030, 1));
-		assertThat(internet()).hasSize(1 + DespesasFixas.MESES_A_FRENTE);
+		assertThat(internet()).hasSize(1 + LancamentosFixos.MESES_A_FRENTE);
 		assertThat(internet().get(internet().size() - 1).getVencimento()).isEqualTo(LocalDate.of(2031, 1, 10));
 	}
 

@@ -37,7 +37,7 @@ public class CadastroDespesas {
 
 	/**
 	 * Registra uma despesa fixa (mensal): grava o primeiro mês, no vencimento
-	 * informado, e a recorrência que lança os meses seguintes (ver {@link DespesasFixas}).
+	 * informado, e a recorrência que lança os meses seguintes (ver {@link LancamentosFixos}).
 	 */
 	@Transactional
 	public Despesa registrarFixa(Despesa dados, Usuario usuario) {

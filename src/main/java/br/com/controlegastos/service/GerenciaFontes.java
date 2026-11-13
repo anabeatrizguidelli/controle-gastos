@@ -10,6 +10,7 @@ import br.com.controlegastos.model.Fonte;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.repository.FonteRepository;
 import br.com.controlegastos.repository.ReceitaRepository;
+import br.com.controlegastos.repository.RecorrenciaReceitaRepository;
 
 /**
  * Regras de cadastro das fontes de receita, usadas pelas páginas e pela API.
@@ -19,10 +20,12 @@ public class GerenciaFontes {
 
 	private final FonteRepository fontes;
 	private final ReceitaRepository receitas;
+	private final RecorrenciaReceitaRepository recorrencias;
 
-	public GerenciaFontes(FonteRepository fontes, ReceitaRepository receitas) {
+	public GerenciaFontes(FonteRepository fontes, ReceitaRepository receitas, RecorrenciaReceitaRepository recorrencias) {
 		this.fontes = fontes;
 		this.receitas = receitas;
+		this.recorrencias = recorrencias;
 	}
 
 	public List<Fonte> listar(Usuario usuario) {
@@ -55,7 +58,7 @@ public class GerenciaFontes {
 
 	/** @return mensagem de erro, ou {@code null} se excluiu. */
 	public String excluir(Fonte fonte) {
-		if (receitas.existsByFonte(fonte)) {
+		if (receitas.existsByFonte(fonte) || recorrencias.existsByFonte(fonte)) {
 			return "A fonte \"" + fonte.getNome()
 					+ "\" tem receitas lançadas. Mova ou exclua essas receitas antes de excluí-la.";
 		}

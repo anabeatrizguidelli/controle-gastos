@@ -20,7 +20,7 @@ import br.com.controlegastos.repository.CategoriaRepository;
 import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.CadastroDespesas;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 import jakarta.validation.Valid;
 
 /**
@@ -34,10 +34,10 @@ public class DespesaApiController {
 	private final CategoriaRepository categorias;
 	private final UsuarioAtual usuarioAtual;
 	private final CadastroDespesas cadastro;
-	private final DespesasFixas fixas;
+	private final LancamentosFixos fixas;
 
 	public DespesaApiController(DespesaRepository despesas, CategoriaRepository categorias, UsuarioAtual usuarioAtual,
-			CadastroDespesas cadastro, DespesasFixas fixas) {
+			CadastroDespesas cadastro, LancamentosFixos fixas) {
 		this.despesas = despesas;
 		this.categorias = categorias;
 		this.usuarioAtual = usuarioAtual;

@@ -14,7 +14,7 @@ import br.com.controlegastos.model.Receita;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.ControleGastos;
-import br.com.controlegastos.service.DespesasFixas;
+import br.com.controlegastos.service.LancamentosFixos;
 import br.com.controlegastos.service.ResumoCategoria;
 import br.com.controlegastos.service.ResumoMes;
 import br.com.controlegastos.service.TotaisMes;
@@ -26,10 +26,10 @@ import br.com.controlegastos.service.TotaisMes;
 public class PainelController {
 
 	private final ControleGastos controle;
-	private final DespesasFixas fixas;
+	private final LancamentosFixos fixas;
 	private final UsuarioAtual usuarioAtual;
 
-	public PainelController(ControleGastos controle, DespesasFixas fixas, UsuarioAtual usuarioAtual) {
+	public PainelController(ControleGastos controle, LancamentosFixos fixas, UsuarioAtual usuarioAtual) {
 		this.controle = controle;
 		this.fixas = fixas;
 		this.usuarioAtual = usuarioAtual;
