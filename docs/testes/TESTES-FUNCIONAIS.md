@@ -68,6 +68,7 @@ Resumo:
 | Teste 04 - Receita fixa, despesas fixas e saldo projetado | passou |
 | Teste 05 - Esqueci minha senha (usuário e e-mail) | passou |
 | Teste 06 - Nome de usuário com @ e nome duplicado | passou |
+| Teste 07 - Envio real do código por e-mail em produção | passou (após correção) |
 
 ### Teste 01 - Cadastro com confirmação de e-mail e login
 
@@ -143,13 +144,27 @@ Situação: passou
 
 Evidência: [teste-06-usuario-invalido-duplicado.txt](evidencias/teste-06-usuario-invalido-duplicado.txt)
 
+### Teste 07 - Envio real do código por e-mail em produção
+
+Entrada/ação: em 13/11/2026, no site publicado (https://finora-control.onrender.com), uma integrante do grupo fez um cadastro novo com o próprio e-mail para receber o código de confirmação enviado pelo serviço Brevo.
+
+Resultado esperado: o código de 6 dígitos chega na caixa de entrada do e-mail informado em poucos segundos.
+
+Resultado obtido: na primeira tentativa, entre 18:07 e 18:15 (horário de Brasília), o código não chegou. Os logs do Render mostraram a mensagem "O provedor de e-mail recusou o envio (HTTP 401)" em quatro tentativas, e o Brevo não registrou nenhum envio. A causa era a chave de API do Brevo configurada no Render, que estava diferente da chave válida. A chave foi corrigida na variável de ambiente `MAIL_API_KEY` e o serviço foi publicado de novo às 18:26. Na nova tentativa, por volta das 18:50, o código chegou na caixa de entrada, sem cair no spam.
+
+Situação: passou (após correção)
+
+Evidência: trechos do log do Render e do painel do Brevo conferidos em 13/11/2026 (a chave não é reproduzida aqui por segurança).
+
 ## Correções realizadas
 
 Nenhuma correção no código da aplicação foi necessária. Os seis testes funcionais passaram, e os 105 testes automáticos também.
 
-O único ajuste feito foi no script usado para coletar o Teste 04 (leitura do campo fonte no HTML), descrito nesse teste. Esse script não faz parte do repositório.
+Em produção, a chave de API do Brevo no Render foi corrigida (configuração, sem mudança de código), o que resolveu o Teste 07.
+
+O único ajuste no ciclo local foi no script usado para coletar o Teste 04 (leitura do campo fonte no HTML), descrito nesse teste. Esse script não faz parte do repositório.
 
 ## Pendências
 
-- O envio real de e-mail em produção (serviço Brevo) não fez parte desta validação local. Aqui os códigos foram lidos no log, em modo desenvolvimento. Vale incluir um envio verdadeiro na próxima rodada de validações em produção.
+- O envio real de e-mail em produção foi validado no Teste 07. O remetente é um Gmail, o que o Brevo não recomenda; um domínio próprio melhoraria a entrega.
 - Não houve falha funcional pendente de correção neste ciclo.
