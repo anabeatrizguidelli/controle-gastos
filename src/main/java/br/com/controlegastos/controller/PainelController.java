@@ -42,6 +42,8 @@ public class PainelController {
 		model.addAttribute("mes", m);
 		model.addAttribute("receitas", controle.totalReceitasMes(usuario, m.getMonthValue(), m.getYear()));
 		model.addAttribute("despesas", controle.totalDespesasMes(usuario, m.getMonthValue(), m.getYear()));
+		model.addAttribute("despesasPagas", controle.totalDespesasPagasMes(usuario, m.getMonthValue(), m.getYear()));
+		model.addAttribute("despesasPendentes", controle.totalDespesasPendentesMes(usuario, m.getMonthValue(), m.getYear()));
 		model.addAttribute("saldo", controle.calcularSaldo(usuario, m.getMonthValue(), m.getYear()));
 		model.addAttribute("saldoAnterior", controle.saldoAnterior(usuario, m.getMonthValue(), m.getYear()));
 		model.addAttribute("saldoDisponivel", controle.saldoDisponivel(usuario, m.getMonthValue(), m.getYear()));

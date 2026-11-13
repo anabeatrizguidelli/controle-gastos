@@ -206,7 +206,7 @@ public class AnaliseGastos {
 							"Somando, foram " + moeda(total) + " no mês. Gastos que se repetem são os mais fáceis de reduzir."));
 				});
 		lista.add(new Sugestao("DICA", maior.getCategoria().getNome(), "Maior despesa do mês: " + maior.getDescricao(),
-				moeda(maior.getValor()) + " em " + maior.getData().format(DateTimeFormatter.ofPattern("dd/MM"))
+				moeda(maior.getValor()) + " em " + maior.getVencimento().format(DateTimeFormatter.ofPattern("dd/MM"))
 						+ ". Compras grandes ficam mais leves quando planejadas: reserve um pouco por mês antes de fazê-las."));
 	}
 

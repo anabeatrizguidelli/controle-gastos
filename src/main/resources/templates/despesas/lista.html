@@ -9,7 +9,7 @@
 		<header class="cabecalho">
 			<div>
 				<h1>Despesas</h1>
-				<p>Gastos lançados no mês selecionado.</p>
+				<p>Despesas e parcelas com vencimento no mês selecionado. Marque a caixa quando pagar.</p>
 			</div>
 			<div class="acoes">
 				<nav th:replace="~{fragmentos :: meses('/despesas', ${mes})}"></nav>
@@ -25,16 +25,29 @@
 				<span class="suave mono" th:text="${#lists.size(despesas)} + (${#lists.size(despesas) == 1} ? ' lançamento' : ' lançamentos')">0 lançamentos</span>
 			</div>
 			<ul class="lancamentos">
-				<li th:each="d : ${despesas}" class="lan">
+				<li th:each="d : ${despesas}" class="lan desp" th:id="'despesa-' + ${d.id}" th:classappend="${d.pago} ? 'pago' : 'pendente'">
 					<span class="ic" th:style="'--cor:' + ${@fmt.cor(d.categoria)}"><th:block th:replace="~{fragmentos :: icone(${d.categoria.nome})}"></th:block></span>
-					<div><span class="d" th:text="${d.descricao}">Descrição</span><span class="s" th:text="${d.categoria.nome}">Categoria</span></div>
-					<span class="dt" th:text="${@fmt.data(d.data)}">01/01/2026</span>
+					<div><span class="d" th:text="${d.descricao}">Descrição</span>
+						<span class="s"><th:block th:text="${d.categoria.nome}">Categoria</th:block> · <span class="parcela"
+							th:text="${d.parcelada} ? 'Parcela ' + ${d.rotuloParcela} : 'À vista'">À vista</span></span></div>
+					<span class="dt"><small>Vence</small> <th:block th:text="${@fmt.data(d.vencimento)}">01/01/2026</th:block></span>
 					<span class="val mono" th:text="${@fmt.moeda(d.valor)}">R$ 0,00</span>
+					<form class="pagar" th:action="@{/despesas/{id}/pagamento(id=${d.id})}" method="post">
+						<input type="hidden" name="mes" th:value="${mes}">
+						<label class="status" th:classappend="${d.pago} ? 'pago' : 'pendente'"
+							th:title="${d.pago} ? 'Desmarque para voltar a Pendente' : 'Marque quando pagar'">
+							<input type="checkbox" name="pago" value="true" th:checked="${d.pago}" data-pagar
+								th:aria-label="'Pago: ' + ${d.descricao} + (${d.parcelada} ? ' parcela ' + ${d.rotuloParcela} : '')">
+							<span th:text="${d.status}">Pendente</span>
+						</label>
+						<noscript><button class="btn btn-mini" type="submit">Salvar</button></noscript>
+					</form>
 					<span class="botoes">
 						<a class="x" th:href="@{/despesas/{id}/editar(id=${d.id})}" title="Editar" th:aria-label="'Editar ' + ${d.descricao}">
 							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
 						<form th:action="@{/despesas/{id}/excluir(id=${d.id})}" method="post"
-							th:with="valorFmt=${@fmt.moeda(d.valor)}" th:data-confirmar="'Excluir a despesa &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')?'">
+							th:with="valorFmt=${@fmt.moeda(d.valor)}"
+							th:data-confirmar="${d.parcelada} ? 'Excluir só a parcela ' + ${d.rotuloParcela} + ' de &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')? As outras parcelas continuam lançadas. Para excluir todas, abra a edição.' : 'Excluir a despesa &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')?'">
 							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${d.descricao}">
 								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
 						</form>
@@ -45,8 +58,10 @@
 					<a th:href="@{/despesas/nova}">Registre a primeira</a>.
 				</li>
 			</ul>
-			<div class="rodape-lista" th:unless="${#lists.isEmpty(despesas)}">
-				<span>Total do mês</span><span class="mono" th:text="${@fmt.moeda(total)}">R$ 0,00</span>
+			<div class="totais-lista" th:unless="${#lists.isEmpty(despesas)}">
+				<div class="rodape-lista"><span>Total do mês</span><span class="mono" th:text="${@fmt.moeda(total)}">R$ 0,00</span></div>
+				<div class="rodape-lista sub"><span><i class="ponto-st pago"></i>Pagas</span><span class="mono" th:text="${@fmt.moeda(totalPagas)}">R$ 0,00</span></div>
+				<div class="rodape-lista sub"><span><i class="ponto-st pendente"></i>Pendentes</span><span class="mono" th:text="${@fmt.moeda(totalPendentes)}">R$ 0,00</span></div>
 			</div>
 		</section>
 	</main>

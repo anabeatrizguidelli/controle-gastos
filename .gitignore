@@ -34,3 +34,6 @@ build/
 
 ### Banco H2 local ###
 data/
+
+### Copias de seguranca do banco H2 local ###
+data-backup-*/

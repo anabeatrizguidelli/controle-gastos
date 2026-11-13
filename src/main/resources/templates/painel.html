@@ -26,13 +26,19 @@
 			</div>
 		</section>
 
-		<section class="resumo painel" aria-label="Indicadores do mês">
+		<section class="resumo seis painel" aria-label="Indicadores do mês">
+			<div><span class="rot">Receitas do mês</span><strong class="num pos" th:text="${@fmt.moeda(receitas)}">R$ 0,00</strong>
+				<span class="det">Tudo o que entrou no mês</span></div>
+			<div><span class="rot">Despesas do mês</span><strong class="num" th:text="${@fmt.moeda(despesas)}">R$ 0,00</strong>
+				<span class="det">Compromissos do mês (pagos + pendentes)</span></div>
+			<div><span class="rot"><i class="ponto-st pago"></i>Despesas pagas</span><strong class="num" th:text="${@fmt.moeda(despesasPagas)}">R$ 0,00</strong>
+				<span class="det">Já saíram do saldo</span></div>
+			<div><span class="rot"><i class="ponto-st pendente"></i>Despesas pendentes</span><strong class="num atencao" th:text="${@fmt.moeda(despesasPendentes)}">R$ 0,00</strong>
+				<span class="det">Ainda a pagar; não reduzem o saldo</span></div>
 			<div><span class="rot">Saldo do mês anterior</span><strong class="num" th:classappend="${saldoAnterior < 0} ? 'neg'" th:text="${@fmt.moeda(saldoAnterior)}">R$ 0,00</strong>
 				<span class="det">Sobra acumulada até o fim de <th:block th:text="${@fmt.mes(mes.minusMonths(1)).toLowerCase()}">setembro</th:block></span></div>
-			<div><span class="rot">Receitas do mês</span><strong class="num pos" th:text="${@fmt.moeda(receitas)}">R$ 0,00</strong></div>
-			<div><span class="rot">Despesas do mês</span><strong class="num" th:text="${@fmt.moeda(despesas)}">R$ 0,00</strong></div>
-			<div><span class="rot">Saldo disponível</span><strong class="num" th:classappend="${saldoDisponivel < 0} ? 'neg' : 'pos'" th:text="${@fmt.moeda(saldoDisponivel)}">R$ 0,00</strong>
-				<span class="det">Saldo anterior + receitas − despesas</span></div>
+			<div class="destaque"><span class="rot">Saldo disponível</span><strong class="num" th:classappend="${saldoDisponivel < 0} ? 'neg' : 'pos'" th:text="${@fmt.moeda(saldoDisponivel)}">R$ 0,00</strong>
+				<span class="det">Saldo anterior + receitas − despesas pagas</span></div>
 		</section>
 
 		<div class="grade2">
@@ -77,7 +83,7 @@
 			<div class="colunas">
 				<a th:each="h : ${historico}" class="coluna" th:classappend="${h.mes == mes} ? 'atual'"
 					th:href="@{/painel(mes=${h.mes})}"
-					th:title="${@fmt.mes(h.mes)} + ': receitas ' + ${@fmt.moeda(h.receitas)} + ', despesas ' + ${@fmt.moeda(h.despesas)} + ', saldo ' + ${@fmt.moeda(h.saldo)}">
+					th:title="${@fmt.mes(h.mes)} + ': receitas ' + ${@fmt.moeda(h.receitas)} + ', despesas ' + ${@fmt.moeda(h.despesas)} + ', sobra prevista ' + ${@fmt.moeda(h.saldo)}">
 					<span class="par-barras">
 						<i class="b-rec" th:style="'height:' + ${h.receitas / maiorDoHistorico * 100} + '%'"></i>
 						<i class="b-des" th:style="'height:' + ${h.despesas / maiorDoHistorico * 100} + '%'"></i>
@@ -87,9 +93,9 @@
 			</div>
 			<ul class="lancamentos">
 				<li class="lan" style="grid-template-columns:minmax(0,1fr) auto">
-					<span th:text="'Resultado de ' + ${@fmt.mes(mes).toLowerCase()} + ' (receitas − despesas)'">Resultado do mês</span>
+					<span th:text="'Resultado de ' + ${@fmt.mes(mes).toLowerCase()} + ' (receitas − despesas pagas)'">Resultado do mês</span>
 					<span class="val mono" th:classappend="${saldo < 0} ? 'neg' : 'pos'"
-						th:text="${@fmt.moeda(receitas)} + ' − ' + ${@fmt.moeda(despesas)} + ' = ' + ${@fmt.moeda(saldo)}">R$ 0,00</span>
+						th:text="${@fmt.moeda(receitas)} + ' − ' + ${@fmt.moeda(despesasPagas)} + ' = ' + ${@fmt.moeda(saldo)}">R$ 0,00</span>
 				</li>
 				<li class="lan" style="grid-template-columns:minmax(0,1fr) auto;font-weight:600">
 					<span>Saldo disponível (com o que sobrou dos meses anteriores)</span>
@@ -105,7 +111,7 @@
 				<ul class="lancamentos">
 					<li th:each="d : ${ultimasDespesas}" class="lan" style="grid-template-columns:36px minmax(0,1fr) auto">
 						<span class="ic" th:style="'--cor:' + ${@fmt.cor(d.categoria)}"><th:block th:replace="~{fragmentos :: icone(${d.categoria.nome})}"></th:block></span>
-						<div><span class="d" th:text="${d.descricao}">Descrição</span><span class="s" th:text="${d.categoria.nome} + ' · ' + ${@fmt.data(d.data)}">Categoria</span></div>
+						<div><span class="d" th:text="${d.descricao}">Descrição</span><span class="s" th:text="${d.categoria.nome} + ' · vence ' + ${@fmt.data(d.vencimento)} + (${d.parcelada} ? ' · ' + ${d.rotuloParcela} : '') + ' · ' + ${d.status}">Categoria</span></div>
 						<span class="val mono" th:text="${@fmt.moeda(d.valor)}">R$ 0,00</span>
 					</li>
 					<li class="vazio" th:if="${#lists.isEmpty(ultimasDespesas)}">Nenhuma despesa neste mês.</li>
