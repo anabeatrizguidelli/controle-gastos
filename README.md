@@ -110,6 +110,8 @@ mvnw.cmd test
 
 Os testes usam um banco em memória separado, então não mexem nos dados de `./data`.
 
+O registro da validação funcional de 13/11/2026 (inicialização, testes automáticos e testes ponta a ponta) está em [`docs/testes/TESTES-FUNCIONAIS.md`](docs/testes/TESTES-FUNCIONAIS.md).
+
 ## Progresso
 
 - [x] Tema, requisitos e diagramas UML

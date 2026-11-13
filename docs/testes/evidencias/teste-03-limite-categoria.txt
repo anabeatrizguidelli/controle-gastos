@@ -1,0 +1,18 @@
+Teste 03 - Categoria com limite e despesa que ultrapassa o limite
+Data: 2026-11-13 16:39:52 (America/Sao_Paulo)
+Conta de teste: validacao.limite.1639 (criada nesta validacao)
+
+Acao:
+- POST /categorias: nome=Validacao Limite, temLimite=true, limiteMensal=50
+- POST /despesas: descricao=Gasto acima do limite, valor=60, categoria=114, data=2026-11-13
+- GET /painel
+
+Resultado esperado: categoria criada com limite de R$ 50,00; despesa de R$ 60,00 registrada; o painel mostra alerta de limite estourado para Validacao Limite.
+HTTP categoria: 302 Location=http://localhost:8080/categorias
+Categoria visivel na lista com R$ 50,00: sim
+HTTP despesa: 302 Location=http://localhost:8080/despesas?mes=2026-11
+GET /painel: HTTP 200
+Alerta de limite estourado: sim
+Trecho do alerta: class="alertas" aria-label="Alertas de limite"> <div class="alerta ESTOURADO" role="status"> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg> <p>Validacao Limite passou do limite do mês: R$ 60,00 de R$ 50,00.</p> </div> </section> <section class="resu
+
+Situacao: passou
