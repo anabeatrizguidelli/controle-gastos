@@ -26,8 +26,11 @@ import br.com.controlegastos.repository.ReceitaRepository;
 @Service
 public class ControleGastos {
 
-	/** Mesma paleta do protótipo visual; a cor de cada categoria é fixa pelo id. */
-	private static final String[] CORES = { "#2563eb", "#16a34a", "#9333ea", "#0891b2", "#db2777", "#64748b" };
+	/**
+	 * Cores das categorias na paleta Capim de Cheiro & Terracota, escolhidas pelo id (id % 6). As categorias
+	 * iniciais ficam como no protótipo: Alimentação (1) terracota, Transporte (2) musgo e Lazer (3) sálvia.
+	 */
+	private static final String[] CORES = { "#B08A3E", "#C86D51", "#4A5D4E", "#5F7363", "#954731", "#8E9E89" };
 
 	private final DespesaRepository despesas;
 	private final ReceitaRepository receitas;

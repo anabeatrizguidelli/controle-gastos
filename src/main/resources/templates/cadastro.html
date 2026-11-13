@@ -33,7 +33,7 @@
 					<input name="confirmacao" type="password" autocomplete="new-password" required minlength="6">
 				</label>
 			</div>
-			<button class="btn btn-p" type="submit">Criar conta</button>
+			<button class="btn btn-p" type="submit"><span>Criar conta</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block></button>
 		</form>
 
 		<p class="suave">Já tem conta? <a th:href="@{/login}">Entrar</a></p>

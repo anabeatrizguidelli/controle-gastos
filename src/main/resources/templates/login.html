@@ -31,7 +31,7 @@
 					data-obrigatorio="Informe sua senha.">
 				<span class="erro" id="senha-erro"></span>
 			</label>
-			<button class="btn btn-p" type="submit">Entrar</button>
+			<button class="btn btn-p" type="submit"><span>Entrar</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block></button>
 		</form>
 
 		<p class="suave">Ainda não tem conta? <a th:href="@{/cadastro}">Criar conta</a></p>

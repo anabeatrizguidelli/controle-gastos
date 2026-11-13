@@ -3,18 +3,19 @@
 (function () {
 	const $ = s => document.querySelector(s);
 
-	// Modo escuro / modo claro: troca o atributo data-theme e guarda a escolha.
+	// Modo claro (padrão) / modo escuro: troca o atributo data-theme e guarda a escolha.
 	function mostrarTema() {
-		const claro = document.documentElement.dataset.theme === 'light';
+		const claro = document.documentElement.dataset.theme !== 'dark';
 		document.querySelectorAll('[data-tema-escuro]').forEach(e => e.hidden = claro);
 		document.querySelectorAll('[data-tema-claro]').forEach(e => e.hidden = !claro);
 		document.querySelectorAll('[data-tema]').forEach(b => b.setAttribute('aria-pressed', String(claro)));
 	}
 	document.querySelectorAll('[data-tema]').forEach(b => b.addEventListener('click', () => {
-		const novo = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+		const novo = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
 		document.documentElement.dataset.theme = novo;
 		try { localStorage.setItem('tema', novo); } catch (e) {}
 		mostrarTema();
+		mostrarAviso(novo === 'dark' ? 'Modo escuro ativado' : 'Modo claro ativado');
 	}));
 	mostrarTema();
 
