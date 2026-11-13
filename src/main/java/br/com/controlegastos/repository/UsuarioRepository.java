@@ -15,6 +15,8 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
 	boolean existsByUsername(String username);
 
+	Optional<Usuario> findByUsername(String username);
+
 	Optional<Usuario> findFirstByEmailIgnoreCaseOrUsername(String email, String username);
 
 	/** Contas antigas, de antes do nome de usuário existir. */

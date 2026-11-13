@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
+import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 
 /**
@@ -26,7 +27,9 @@ public class DadosComuns {
 		if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
 			return null;
 		}
-		return usuarioAtual.get().getNome();
+		Usuario usuario = usuarioAtual.get();
+		// O nome de usuário aparece junto para quem teve um gerado automaticamente saber qual é.
+		return usuario.getUsername() == null ? usuario.getNome() : usuario.getNome() + " · @" + usuario.getUsername();
 	}
 
 }

@@ -25,7 +25,7 @@ import br.com.controlegastos.service.Verificacoes;
 public class AutenticacaoController {
 
 	static final String CODIGO_INVALIDO = "Código inválido ou expirado. Confira o e-mail ou peça um novo código.";
-	static final String PEDIDO_NEUTRO = "Se existir uma conta com esses dados, enviamos um código de 6 dígitos para o e-mail dela. "
+	static final String PEDIDO_NEUTRO = "Se o nome de usuário e o e-mail forem da mesma conta, enviamos um código de 6 dígitos para esse e-mail. "
 			+ "Você pode pedir outro a cada minuto.";
 
 	private final CadastroUsuario cadastro;
@@ -133,25 +133,27 @@ public class AutenticacaoController {
 	// ---------- esqueci minha senha ----------
 
 	@GetMapping("/senha/esqueci")
-	public String telaEsqueci(@RequestParam(defaultValue = "") String login, Model model, RedirectAttributes redirect) {
+	public String telaEsqueci(@RequestParam(defaultValue = "") String usuario, Model model, RedirectAttributes redirect) {
 		if (!verificacoes.ativa()) {
 			return indisponivel(redirect);
 		}
-		return etapa(model, "esqueci", login);
+		return etapa(model, "esqueci", usuario);
 	}
 
 	@PostMapping("/senha/esqueci")
-	public String esqueci(@RequestParam(defaultValue = "") String login, Model model, RedirectAttributes redirect) {
+	public String esqueci(@RequestParam(defaultValue = "") String usuario, @RequestParam(defaultValue = "") String email,
+			Model model, RedirectAttributes redirect) {
 		if (!verificacoes.ativa()) {
 			return indisponivel(redirect);
 		}
-		if (login.isBlank()) {
-			model.addAttribute("erro", "Informe seu e-mail ou nome de usuário.");
-			return etapa(model, "esqueci", login);
+		if (usuario.isBlank() || email.isBlank()) {
+			model.addAttribute("erro", "Informe o nome de usuário e o e-mail cadastrado.");
+			model.addAttribute("email", email);
+			return etapa(model, "esqueci", usuario);
 		}
-		verificacoes.pedirNovaSenha(login);
+		verificacoes.pedirNovaSenha(usuario, email);
 		redirect.addFlashAttribute("sucesso", PEDIDO_NEUTRO);
-		redirect.addAttribute("login", login.trim());
+		redirect.addAttribute("login", CadastroUsuario.normalizarUsername(usuario));
 		return "redirect:/senha/redefinir";
 	}
 

@@ -131,11 +131,17 @@ public class Verificacoes {
 		return true;
 	}
 
-	/** "Esqueci minha senha": envia o código se a conta existir (a tela não conta se existe). */
+	/**
+	 * "Esqueci minha senha": só envia o código se o nome de usuário e o e-mail
+	 * forem da mesma conta. A tela mostra a mesma mensagem em qualquer caso.
+	 */
 	@Transactional
-	public void pedirNovaSenha(String login) {
-		if (ativa) {
-			usuarios.buscarPorLogin(login).ifPresent(u -> enviarCodigo(u, CodigoVerificacao.REDEFINIR_SENHA));
+	public void pedirNovaSenha(String username, String email) {
+		String emailNormalizado = email == null ? "" : email.trim();
+		if (ativa && !emailNormalizado.isEmpty()) {
+			usuarios.findByUsername(CadastroUsuario.normalizarUsername(username))
+					.filter(u -> u.getEmail().equalsIgnoreCase(emailNormalizado))
+					.ifPresent(u -> enviarCodigo(u, CodigoVerificacao.REDEFINIR_SENHA));
 		}
 	}
 

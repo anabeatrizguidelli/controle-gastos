@@ -237,7 +237,7 @@ class ContaTests {
 	@Test
 	void esqueciMinhaSenhaDePontaAPonta() throws Exception {
 		cadastro.cadastrar("Lia", "lia@exemplo.com", "antiga1");
-		mvc.perform(post("/senha/esqueci").with(csrf()).param("login", "lia"))
+		esqueci(" LIA ", " Lia@Exemplo.com ")
 				.andExpect(redirectedUrl("/senha/redefinir?login=lia"))
 				.andExpect(flash().attribute("sucesso", AutenticacaoController.PEDIDO_NEUTRO));
 		String codigo = caixa.ultimoCodigo("lia@exemplo.com");
@@ -255,18 +255,39 @@ class ContaTests {
 
 	@Test
 	void mensagemNeutraParaContaDesconhecida() throws Exception {
-		mvc.perform(post("/senha/esqueci").with(csrf()).param("login", "ninguem@exemplo.com"))
-				.andExpect(redirectedUrl("/senha/redefinir?login=ninguem%40exemplo.com"))
+		esqueci("ninguem", "ninguem@exemplo.com")
+				.andExpect(redirectedUrl("/senha/redefinir?login=ninguem"))
 				.andExpect(flash().attribute("sucesso", AutenticacaoController.PEDIDO_NEUTRO));
 		assertThat(caixa.recebidos).isEmpty();
-		redefinir("ninguem@exemplo.com", "123456", "novinha1")
+		redefinir("ninguem", "123456", "novinha1")
 				.andExpect(content().string(containsString("Código inválido ou expirado")));
+	}
+
+	@Test
+	void usuarioEEmailDeContasDiferentesNaoGeramCodigo() throws Exception {
+		cadastro.cadastrar("Lia", "lia@exemplo.com", "antiga1");
+		// Usuário da Lia com o e-mail da demo, e o contrário: mesma resposta, nenhum e-mail.
+		esqueci("lia", DadosIniciais.EMAIL_DEMO).andExpect(redirectedUrl("/senha/redefinir?login=lia"))
+				.andExpect(flash().attribute("sucesso", AutenticacaoController.PEDIDO_NEUTRO));
+		esqueci("estudante", "lia@exemplo.com").andExpect(flash().attribute("sucesso", AutenticacaoController.PEDIDO_NEUTRO));
+		// Só um dos dois campos não serve (o e-mail não vale como nome de usuário).
+		esqueci("lia@exemplo.com", "lia@exemplo.com").andExpect(flash().attribute("sucesso", AutenticacaoController.PEDIDO_NEUTRO));
+		esqueci("lia", "").andExpect(status().isOk())
+				.andExpect(content().string(containsString("Informe o nome de usuário e o e-mail cadastrado.")));
+		assertThat(caixa.recebidos).isEmpty();
+		assertThat(codigos.count()).isZero();
+	}
+
+	@Test
+	void menuMostraONomeDeUsuario() throws Exception {
+		mvc.perform(get("/painel").with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors
+				.user(DadosIniciais.EMAIL_DEMO))).andExpect(content().string(containsString("@estudante")));
 	}
 
 	@Test
 	void redefinirSenhaTambemConfirmaOEmail() throws Exception {
 		pendente("davi", "davi@exemplo.com");
-		mvc.perform(post("/senha/esqueci").with(csrf()).param("login", "davi@exemplo.com"));
+		esqueci("Davi", "davi@exemplo.com");
 		redefinir("davi", caixa.ultimoCodigo("davi@exemplo.com"), "novinha1").andExpect(redirectedUrl("/login"));
 		entrar("davi", "novinha1").andExpect(redirectedUrl("/painel"));
 	}
@@ -305,6 +326,10 @@ class ContaTests {
 	private ResultActions cadastrar(String usuario, String email) throws Exception {
 		return mvc.perform(post("/cadastro").with(csrf()).param("nome", "Pessoa").param("usuario", usuario)
 				.param("email", email).param("senha", "segredo1").param("confirmacao", "segredo1"));
+	}
+
+	private ResultActions esqueci(String usuario, String email) throws Exception {
+		return mvc.perform(post("/senha/esqueci").with(csrf()).param("usuario", usuario).param("email", email));
 	}
 
 	private ResultActions entrar(String login, String senha) throws Exception {
