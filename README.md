@@ -161,7 +161,7 @@ Evidências do teste (JSON e prints) em [`docs/evidencias/`](docs/evidencias).
 
 Os diagramas UML (abrir em https://app.diagrams.net) estão em [`docs/`](docs):
 - `diagrama-de-classes.drawio`: diagrama de classes do projeto, atualizado com o código atual. Tem duas páginas: "Diagrama de Classes" (classes de domínio e `ControleGastos`) e "Serviços" (camada de serviços e envio de e-mail). Imagens: [`diagrama-de-classes.png`](docs/diagrama-de-classes.png) e [`diagrama-de-servicos.png`](docs/diagrama-de-servicos.png).
-- `casos-de-uso-e-classes.drawio`: casos de uso e a versão detalhada das classes feita no início do projeto (proposta original).
+- `casos-de-uso-e-classes.drawio`: diagrama de casos de uso, atualizado com os casos RF6 a RF17 (em roxo) e os atores secundários Serviço de e-mail (Brevo) e Cliente da API, e a versão detalhada das classes feita no início do projeto (proposta original). Imagem dos casos de uso: [`diagrama-de-casos-de-uso.png`](docs/diagrama-de-casos-de-uso.png).
 - [`dicionario-de-dados.md`](docs/dicionario-de-dados.md): dicionário de dados das tabelas do banco, com cada campo e o que ele faz.
 - [`servicos-externos.md`](docs/servicos-externos.md): serviços e tecnologias externas (GitHub, Render, Supabase, Brevo e bibliotecas).
 

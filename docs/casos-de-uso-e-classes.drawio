@@ -1,63 +1,63 @@
 <mxfile host="app.diagrams.net" agent="Claude Code" version="24.7.17">
   <!-- ===================== PÁGINA 1: CASOS DE USO ===================== -->
   <diagram id="casos-de-uso" name="Casos de Uso">
-    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1360" pageHeight="1840" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
         <!-- Fronteira do sistema -->
-        <mxCell id="uc-sistema" value="Sistema de Controle de Gastos Pessoais" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;spacingTop=6;" vertex="1" parent="1">
-          <mxGeometry x="220" y="40" width="680" height="560" as="geometry" />
+        <mxCell id="uc-sistema" value="Sistema de Controle de Gastos Pessoais (Finora)" style="rounded=0;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=14;fillColor=#f5f5f5;strokeColor=#666666;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="220" y="40" width="960" height="1790" as="geometry" />
         </mxCell>
 
         <!-- Ator -->
         <mxCell id="uc-ator" value="Estudante&lt;br&gt;universitário" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
-          <mxGeometry x="70" y="270" width="40" height="80" as="geometry" />
+          <mxGeometry x="70" y="800" width="40" height="80" as="geometry" />
         </mxCell>
 
         <!-- Casos de uso principais -->
         <mxCell id="uc1" value="Registrar despesa&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF1)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="270" y="90" width="200" height="60" as="geometry" />
+          <mxGeometry x="270" y="450" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc2" value="Registrar receita&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF2)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="270" y="180" width="200" height="60" as="geometry" />
+          <mxGeometry x="270" y="540" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc3" value="Listar despesas e receitas&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF3)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="270" y="270" width="200" height="60" as="geometry" />
+          <mxGeometry x="270" y="630" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc4" value="Consultar resumo mensal&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF4)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="270" y="360" width="200" height="60" as="geometry" />
+          <mxGeometry x="270" y="720" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc5" value="Definir limite mensal&lt;br&gt;por categoria&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(apoio ao RF5)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
-          <mxGeometry x="270" y="450" width="200" height="70" as="geometry" />
+          <mxGeometry x="270" y="810" width="200" height="70" as="geometry" />
         </mxCell>
 
         <!-- Casos de uso secundários -->
         <mxCell id="uc6" value="Verificar limite&lt;br&gt;da categoria" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="640" y="90" width="200" height="60" as="geometry" />
+          <mxGeometry x="640" y="450" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc7" value="Emitir alerta de limite&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF5 – 80% / 100%)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
-          <mxGeometry x="640" y="230" width="200" height="60" as="geometry" />
+          <mxGeometry x="640" y="590" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="uc8" value="Calcular totais e saldo&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(receitas − despesas)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="640" y="360" width="200" height="60" as="geometry" />
+          <mxGeometry x="640" y="720" width="200" height="60" as="geometry" />
         </mxCell>
 
         <!-- Ator -> casos de uso -->
-        <mxCell id="uc-a1" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator" target="uc1">
+        <mxCell id="uc-a1" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="uc-a2" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator" target="uc2">
+        <mxCell id="uc-a2" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc2">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="uc-a3" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator" target="uc3">
+        <mxCell id="uc-a3" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc3">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="uc-a4" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator" target="uc4">
+        <mxCell id="uc-a4" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc4">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="uc-a5" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator" target="uc5">
+        <mxCell id="uc-a5" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
@@ -77,7 +77,136 @@
 
         <!-- Nota RNF -->
         <mxCell id="uc-nota" value="&lt;b&gt;Requisitos não funcionais&lt;/b&gt;&lt;br&gt;RNF1: interface responsiva, legível em tela de celular.&lt;br&gt;RNF2: valores monetários no formato R$ 0,00." style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
-          <mxGeometry x="560" y="480" width="320" height="80" as="geometry" />
+          <mxGeometry x="600" y="1580" width="320" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Atualização: casos de uso implementados além do escopo original (RF6 a RF17) ===== -->
+        <!-- Casos de uso novos do estudante -->
+        <mxCell id="uc9" value="Criar conta&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF6)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="90" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc10" value="Confirmar e-mail&lt;br&gt;com código&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF7)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="180" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc11" value="Recuperar senha&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF8)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="270" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc12" value="Entrar no sistema&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF6)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="360" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc13" value="Consultar saldos&lt;br&gt;(anterior, disponível e projetado)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF14)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="920" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc14" value="Visualizar painel&lt;br&gt;com gráficos e histórico&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF15)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1010" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc15" value="Ver sugestões de economia&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF16)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1100" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc16" value="Gerenciar categorias&lt;br&gt;e fontes de receita&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF9)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1190" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc17" value="Editar ou excluir&lt;br&gt;despesa / receita&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF10)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1280" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc18" value="Registrar compra parcelada&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF11)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1370" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc19" value="Registrar despesa&lt;br&gt;ou receita fixa&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF12)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1460" width="200" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc20" value="Marcar despesa como&lt;br&gt;paga ou pendente&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF13)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="270" y="1550" width="200" height="70" as="geometry" />
+        </mxCell>
+        <!-- Casos de uso incluídos (novos) -->
+        <mxCell id="uc21" value="Enviar código&lt;br&gt;por e-mail" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="200" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc22" value="Gerar parcelas mensais&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(até 120)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1370" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="uc23" value="Lançar meses seguintes&lt;br&gt;automaticamente&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(até 12 meses à frente)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1455" width="200" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="uc24" value="Consultar e registrar&lt;br&gt;dados pela API JSON&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(RF17 – HTTP Basic)&lt;/font&gt;" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="950" y="1010" width="200" height="70" as="geometry" />
+        </mxCell>
+        <!-- Atores secundários -->
+        <mxCell id="uc-ator-email" value="«sistema»&lt;br&gt;Serviço de e-mail&lt;br&gt;(Brevo)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="190" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-ator-api" value="«sistema»&lt;br&gt;Cliente da API" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="1005" width="40" height="80" as="geometry" />
+        </mxCell>
+        <!-- Estudante -> casos de uso novos -->
+        <mxCell id="uc-a-uc9" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc10" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc11" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc12" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc13" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc14" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc15" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc15">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc16" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc16">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc17" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc18" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc19" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc19">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-uc20" style="endArrow=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="uc-ator" target="uc20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Atores secundários -> casos de uso -->
+        <mxCell id="uc-a-email" style="endArrow=none;html=1;" edge="1" parent="1" source="uc21" target="uc-ator-email">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-a-api" style="endArrow=none;html=1;" edge="1" parent="1" source="uc-ator-api" target="uc24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- include / extend novos -->
+        <mxCell id="uc-e2" value="«extend»&lt;br&gt;[envio de e-mail ativo]" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc10" target="uc9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i4" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc10" target="uc21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i5" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc11" target="uc21">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i6" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc13" target="uc8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i7" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc14" target="uc13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i8" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc18" target="uc22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="uc-i9" value="«include»" style="endArrow=open;endSize=10;dashed=1;html=1;fontSize=10;" edge="1" parent="1" source="uc19" target="uc23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <!-- Legenda -->
+        <mxCell id="uc-legenda" value="&lt;b&gt;Legenda&lt;/b&gt;&lt;br&gt;Azul: casos de uso da proposta original.&lt;br&gt;Roxo: implementados além do escopo original (RF6 a RF17).&lt;br&gt;Verde: casos de uso incluídos. Vermelho: alerta (RF5).&lt;br&gt;&lt;b&gt;Requisitos não funcionais novos&lt;/b&gt;: RNF3 segurança (BCrypt, códigos com hash, validade e tentativas), RNF4 modo claro/escuro, RNF5 nuvem (Render + Supabase), RNF6 e-mail pela API da Brevo, RNF7 testes automatizados, RNF8 proteção contra envio duplicado." style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1680" width="560" height="130" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
