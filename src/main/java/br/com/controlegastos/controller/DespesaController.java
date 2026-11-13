@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -127,23 +128,23 @@ public class DespesaController {
 
 	@PostMapping("/{id}")
 	public String atualizar(@PathVariable Integer id, @Valid @ModelAttribute("despesa") Despesa dados,
-			BindingResult erros, Model model, RedirectAttributes redirect) {
+			BindingResult erros, @RequestParam(defaultValue = "false") boolean aplicarDemaisPendentes, Model model,
+			RedirectAttributes redirect) {
 		Despesa existente = buscar(id);
 		validarCategoria(dados, existente.getUsuario(), erros);
 		if (erros.hasErrors()) {
 			model.addAttribute("original", existente);
 			return formulario(dados, id, 1, model);
 		}
-		existente.setDescricao(dados.getDescricao());
-		existente.setValor(dados.getValor());
-		existente.setData(dados.getData());
-		if (dados.getVencimento() != null) {
-			existente.setVencimento(dados.getVencimento());
+		// "Sim" na pergunta da tela: o novo valor vale também para as outras parcelas pendentes.
+		int outras = cadastro.atualizar(existente, dados, aplicarDemaisPendentes);
+		String mensagem = existente.isParcelada() ? "Parcela " + existente.getRotuloParcela() + " atualizada."
+				: "Despesa atualizada.";
+		if (outras > 0) {
+			mensagem += " Novo valor aplicado também a " + (outras == 1 ? "1 parcela pendente."
+					: outras + " parcelas pendentes.");
 		}
-		existente.setCategoria(dados.getCategoria());
-		despesas.save(existente);
-		redirect.addFlashAttribute("sucesso", existente.isParcelada()
-				? "Parcela " + existente.getRotuloParcela() + " atualizada." : "Despesa atualizada.");
+		redirect.addFlashAttribute("sucesso", mensagem);
 		return "redirect:/despesas?mes=" + YearMonth.from(existente.getVencimento());
 	}
 
@@ -191,6 +192,11 @@ public class DespesaController {
 		if (!model.containsAttribute("original")) {
 			model.addAttribute("original", id == null ? null : despesa);
 		}
+		Despesa original = (Despesa) model.getAttribute("original");
+		long outrasPendentes = original == null ? 0L : cadastro.outrasParcelasPendentes(original);
+		model.addAttribute("outrasPendentes", outrasPendentes);
+		// Valor salvo da parcela, para a tela saber se o valor mudou antes de perguntar.
+		model.addAttribute("valorOriginal", outrasPendentes > 0 ? String.format(Locale.ROOT, "%.2f", original.getValor()) : null);
 		if (id == null && model.getAttribute("chaveFormulario") == null) {
 			model.addAttribute("chaveFormulario", UUID.randomUUID().toString());
 		}

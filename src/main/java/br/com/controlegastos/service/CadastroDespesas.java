@@ -1,6 +1,7 @@
 package br.com.controlegastos.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,69 @@ public class CadastroDespesas {
 			lista.add(parcela);
 		}
 		return despesas.saveAll(lista);
+	}
+
+	/**
+	 * Salva a edição de uma despesa ou parcela (descrição, valor, data,
+	 * vencimento e categoria valem só para ela).
+	 * <p>
+	 * Numa compra parcelada, com {@code aplicarNasDemaisPendentes} o novo valor
+	 * também passa para as outras parcelas ainda <strong>pendentes</strong> da
+	 * mesma compra; sem ele, as outras mantêm o valor que já tinham. Parcelas
+	 * pagas nunca são alteradas. Em todos os casos o valor total da compra é
+	 * recalculado como a soma das parcelas.
+	 *
+	 * @return quantas outras parcelas tiveram o valor alterado
+	 */
+	@Transactional
+	public int atualizar(Despesa existente, Despesa dados, boolean aplicarNasDemaisPendentes) {
+		double novoValor = emCentavos(dados.getValor()).doubleValue();
+		existente.setDescricao(dados.getDescricao());
+		existente.setValor(novoValor);
+		existente.setData(dados.getData());
+		if (dados.getVencimento() != null) {
+			existente.setVencimento(dados.getVencimento());
+		}
+		existente.setCategoria(dados.getCategoria());
+		despesas.save(existente);
+		Parcelamento compra = existente.getParcelamento();
+		if (compra == null) {
+			return 0;
+		}
+		List<Despesa> parcelas = despesas.findByParcelamentoOrderByNumeroParcelaAsc(compra);
+		int alteradas = 0;
+		if (aplicarNasDemaisPendentes) {
+			for (Despesa outra : parcelas) {
+				if (!outra.getId().equals(existente.getId()) && !outra.isPago()
+						&& emCentavos(outra.getValor()).compareTo(emCentavos(novoValor)) != 0) {
+					outra.setValor(novoValor);
+					alteradas++;
+				}
+			}
+			despesas.saveAll(parcelas);
+		}
+		recalcularTotal(compra, parcelas);
+		return alteradas;
+	}
+
+	/** Quantas outras parcelas da mesma compra ainda estão pendentes (0 para despesas à vista). */
+	public long outrasParcelasPendentes(Despesa despesa) {
+		if (despesa.getParcelamento() == null) {
+			return 0;
+		}
+		return despesas.findByParcelamentoOrderByNumeroParcelaAsc(despesa.getParcelamento()).stream()
+				.filter(p -> !p.getId().equals(despesa.getId()) && !p.isPago()).count();
+	}
+
+	/** O valor total da compra é sempre a soma exata das parcelas que ela tem. */
+	private void recalcularTotal(Parcelamento compra, List<Despesa> parcelas) {
+		BigDecimal soma = parcelas.stream().map(p -> emCentavos(p.getValor())).reduce(BigDecimal.ZERO, BigDecimal::add);
+		compra.setValorTotal(soma.doubleValue());
+		parcelamentos.save(compra);
+	}
+
+	private static BigDecimal emCentavos(double valor) {
+		return BigDecimal.valueOf(valor).setScale(2, RoundingMode.HALF_UP);
 	}
 
 	/** Marca (ou desmarca) só esta parcela como paga. Repetir o mesmo valor não muda nada. */

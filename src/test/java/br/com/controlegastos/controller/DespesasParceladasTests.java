@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,6 +40,7 @@ import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.repository.FonteRepository;
 import br.com.controlegastos.repository.ParcelamentoRepository;
 import br.com.controlegastos.repository.ReceitaRepository;
+import br.com.controlegastos.service.CadastroDespesas;
 import br.com.controlegastos.service.CadastroUsuario;
 import br.com.controlegastos.service.ControleGastos;
 import jakarta.persistence.EntityManager;
@@ -78,6 +80,9 @@ class DespesasParceladasTests {
 
 	@Autowired
 	private ControleGastos controle;
+
+	@Autowired
+	private CadastroDespesas cadastro;
 
 	@Autowired
 	private EntityManager em;
@@ -309,6 +314,110 @@ class DespesasParceladasTests {
 		mvc.perform(post("/despesas/{id}/excluir", primeira.getId()).with(LOGADO).with(csrf()).param("todas", "true"));
 		assertThat(despesas.listarTodas(usuario)).isEmpty();
 		assertThat(parcelamentos.findAll()).isEmpty();
+	}
+
+	// Edição do valor de uma parcela: pergunta se vale para as demais pendentes
+	@Test
+	void editarValorDeUmaParcelaMostraAPerguntaDasDemaisPendentes() throws Exception {
+		criarEnergiaSolar();
+		List<Despesa> parcelas = parcelasDaEnergiaSolar();
+		mvc.perform(get("/despesas/{id}/editar", parcelas.get(2).getId()).with(LOGADO))
+				.andExpect(content().string(containsString("Deseja aplicar este novo valor às demais parcelas pendentes?")))
+				.andExpect(content().string(containsString("as outras 13 parcelas pendentes passam")))
+				.andExpect(content().string(containsString("name=\"aplicarDemaisPendentes\"")))
+				.andExpect(content().string(containsString("data-valor-original=\"1000.00\"")));
+
+		// Despesa à vista: sem pergunta.
+		Despesa mercado = criarAVista("Mercado", "80", "2027-01-10");
+		mvc.perform(get("/despesas/{id}/editar", mercado.getId()).with(LOGADO))
+				.andExpect(content().string(not(containsString("Deseja aplicar este novo valor"))))
+				.andExpect(content().string(not(containsString("aplicarDemaisPendentes"))));
+
+		// Todas as outras parcelas pagas: também não pergunta.
+		for (Despesa p : parcelas.subList(0, 13)) {
+			marcar(p, true);
+		}
+		mvc.perform(get("/despesas/{id}/editar", parcelas.get(13).getId()).with(LOGADO))
+				.andExpect(content().string(not(containsString("Deseja aplicar este novo valor"))));
+	}
+
+	@Test
+	void editarValorRespondendoNaoMudaSoEstaParcelaEAtualizaOTotal() throws Exception {
+		criarEnergiaSolar();
+		List<Despesa> parcelas = parcelasDaEnergiaSolar();
+		Despesa terceira = parcelas.get(2);
+		mvc.perform(post("/despesas/{id}", terceira.getId()).with(LOGADO).with(csrf()).param("descricao", "Energia solar")
+				.param("valor", "1200").param("data", "2026-12-01").param("vencimento", "2027-03-15")
+				.param("categoria", categoria).param("aplicarDemaisPendentes", "false"))
+				.andExpect(redirectedUrl("/despesas?mes=2027-03"))
+				.andExpect(flash().attribute("sucesso", "Parcela 3/14 atualizada."));
+		em.flush();
+		em.clear();
+		List<Despesa> depois = parcelasDaEnergiaSolar();
+		for (int i = 0; i < 14; i++) {
+			assertThat(depois.get(i).getValor()).isEqualTo(i == 2 ? 1200.0 : 1000.0);
+		}
+		assertThat(parcelamentos.findAll().get(0).getValorTotal()).isEqualTo(14200.0);
+		// Sem o parâmetro (navegador sem JavaScript) vale "Não".
+		mvc.perform(post("/despesas/{id}", terceira.getId()).with(LOGADO).with(csrf()).param("descricao", "Energia solar")
+				.param("valor", "1100.50").param("data", "2026-12-01").param("vencimento", "2027-03-15")
+				.param("categoria", categoria));
+		em.flush();
+		em.clear();
+		assertThat(parcelasDaEnergiaSolar().stream().filter(p -> p.getValor() == 1000.0)).hasSize(13);
+		assertThat(parcelamentos.findAll().get(0).getValorTotal()).isEqualTo(14100.50);
+		mvc.perform(get("/despesas/{id}/editar", terceira.getId()).with(LOGADO))
+				.andExpect(content().string(containsString("R$ 14.100,50")));
+	}
+
+	@Test
+	void editarValorRespondendoSimMudaAsDemaisPendentesMasNaoAsPagas() throws Exception {
+		criarEnergiaSolar();
+		List<Despesa> parcelas = parcelasDaEnergiaSolar();
+		marcar(parcelas.get(0), true);
+		marcar(parcelas.get(1), true);
+		marcar(parcelas.get(6), true);
+		Despesa quinta = parcelas.get(4);
+		mvc.perform(post("/despesas/{id}", quinta.getId()).with(LOGADO).with(csrf()).param("descricao", "Energia solar")
+				.param("valor", "1100").param("data", "2026-12-01").param("vencimento", "2027-05-15")
+				.param("categoria", categoria).param("aplicarDemaisPendentes", "true"))
+				.andExpect(redirectedUrl("/despesas?mes=2027-05"))
+				.andExpect(flash().attribute("sucesso", "Parcela 5/14 atualizada. Novo valor aplicado também a 10 parcelas pendentes."));
+		em.flush();
+		em.clear();
+		List<Despesa> depois = parcelasDaEnergiaSolar();
+		for (int i = 0; i < 14; i++) {
+			Despesa p = depois.get(i);
+			boolean paga = i == 0 || i == 1 || i == 6;
+			assertThat(p.isPago()).isEqualTo(paga);
+			assertThat(p.getValor()).as("parcela %d", i + 1).isEqualTo(paga ? 1000.0 : 1100.0);
+			// Só o valor muda: vencimentos e descrição continuam os mesmos.
+			assertThat(p.getVencimento()).isEqualTo(LocalDate.of(2027, 1, 15).plusMonths(i));
+		}
+		// 3 pagas x 1.000 + 11 pendentes x 1.100
+		assertThat(parcelamentos.findAll().get(0).getValorTotal()).isEqualTo(15100.0);
+		assertThat(controle.totalDespesasPendentesMes(usuario, 8, 2027)).isEqualTo(1100.0);
+		assertThat(controle.totalDespesasPagasMes(usuario, 7, 2027)).isEqualTo(1000.0);
+	}
+
+	@Test
+	void servicoMantemOTotalIgualASomaDasParcelas() throws Exception {
+		mvc.perform(post("/despesas").with(LOGADO).with(csrf()).param("descricao", "Curso").param("valor", "100")
+				.param("quantidadeParcelas", "3").param("data", "2027-01-05").param("vencimento", "2027-01-10")
+				.param("categoria", categoria));
+		List<Despesa> curso = despesas.listarTodas(usuario).stream()
+				.sorted((a, b) -> a.getNumeroParcela() - b.getNumeroParcela()).toList();
+		// 33,34 + 33,33 + 33,33: a 2ª passa a 40,005 (arredonda para 40,01) e vale para a 3ª, pendente.
+		Despesa dados = new Despesa("Curso", 40.005, LocalDate.of(2027, 1, 5), curso.get(1).getCategoria());
+		dados.setVencimento(LocalDate.of(2027, 2, 10));
+		assertThat(cadastro.outrasParcelasPendentes(curso.get(1))).isEqualTo(2);
+		assertThat(cadastro.atualizar(curso.get(1), dados, true)).isEqualTo(2);
+		em.flush();
+		em.clear();
+		List<Double> valores = despesas.listarTodas(usuario).stream()
+				.sorted((a, b) -> a.getNumeroParcela() - b.getNumeroParcela()).map(Despesa::getValor).toList();
+		assertThat(valores).containsExactly(40.01, 40.01, 40.01);
+		assertThat(parcelamentos.findAll().get(0).getValorTotal()).isEqualTo(120.03);
 	}
 
 	// API: começa pendente e o pagamento é por parcela

@@ -90,6 +90,33 @@
 		if (y !== null) { sessionStorage.removeItem('rolagem'); window.scrollTo(0, parseInt(y, 10) || 0); }
 	} catch (e) {}
 
+	// Edição de parcela: se o valor mudou e a compra tem outras parcelas pendentes,
+	// pergunta se o novo valor vale também para elas (Sim/Não) antes de salvar.
+	// Precisa vir antes do "enviar uma vez" para que o botão não fique desativado.
+	const dlgParcelas = $('#dlg-demais-parcelas'), formDespesa = $('#form-despesa'), aplicar = $('#aplicarDemaisPendentes');
+	if (dlgParcelas && formDespesa && aplicar && formDespesa.dataset.valorOriginal) {
+		const centavosDe = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100);
+		let decidido = false;
+		formDespesa.addEventListener('submit', e => {
+			if (decidido) return;
+			const novo = centavosDe($('#valor').value);
+			if (!(novo > 0) || novo === centavosDe(formDespesa.dataset.valorOriginal)) { aplicar.value = 'false'; return; }
+			e.preventDefault();
+			dlgParcelas.querySelector('[data-novo-valor]').textContent =
+				(novo / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+			dlgParcelas.showModal();
+		});
+		dlgParcelas.querySelectorAll('[data-aplicar]').forEach(b => b.addEventListener('click', () => {
+			aplicar.value = b.dataset.aplicar;
+			decidido = true;
+			dlgParcelas.close();
+			if (formDespesa.requestSubmit) formDespesa.requestSubmit(); else formDespesa.submit();
+		}));
+		// Fechar (X, Esc ou clique fora) cancela: nada é salvo e o formulário continua aberto.
+		dlgParcelas.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dlgParcelas.close()));
+		dlgParcelas.addEventListener('click', e => { if (e.target === dlgParcelas) dlgParcelas.close(); });
+	}
+
 	// Evita clique duplo no "Salvar" (o servidor também ignora o mesmo formulário enviado duas vezes).
 	document.querySelectorAll('[data-enviar-uma-vez]').forEach(botao => botao.form.addEventListener('submit', e => {
 		if (e.defaultPrevented) return;

@@ -60,6 +60,10 @@ public class Parcelamento {
 		return valorTotal;
 	}
 
+	public void setValorTotal(double valorTotal) {
+		this.valorTotal = valorTotal;
+	}
+
 	public int getQuantidadeParcelas() {
 		return quantidadeParcelas;
 	}
