@@ -1,5 +1,8 @@
 package br.com.controlegastos.service;
 
+import java.util.List;
+import java.util.Locale;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,11 +38,65 @@ public class CadastroUsuario {
 		return usuarios.existsByEmailIgnoreCase(email.trim());
 	}
 
+	/** Nome de usuário como fica gravado: sem espaços nas pontas e em minúsculas. */
+	public static String normalizarUsername(String username) {
+		return username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+	}
+
+	public static boolean usernameValido(String username) {
+		return normalizarUsername(username).matches(Usuario.FORMATO_USERNAME);
+	}
+
+	public boolean usernameEmUso(String username) {
+		return usuarios.existsByUsername(normalizarUsername(username));
+	}
+
+	/** Conta já confirmada, com nome de usuário gerado a partir do e-mail (conta de demonstração e testes). */
 	@Transactional
 	public Usuario cadastrar(String nome, String email, String senha) {
-		Usuario usuario = usuarios.save(new Usuario(nome.trim(), email.trim().toLowerCase(), codificador.encode(senha)));
+		return cadastrar(nome, null, email, senha, null);
+	}
+
+	/**
+	 * @param emailConfirmado {@code false} quando a conta precisa confirmar o e-mail
+	 *                        antes de entrar; {@code null} quando não precisa
+	 */
+	@Transactional
+	public Usuario cadastrar(String nome, String username, String email, String senha, Boolean emailConfirmado) {
+		String emailNormalizado = email.trim().toLowerCase();
+		Usuario usuario = new Usuario(nome.trim(), emailNormalizado, codificador.encode(senha));
+		usuario.setUsername(username == null ? usernameLivre(emailNormalizado) : normalizarUsername(username));
+		usuario.setEmailConfirmado(emailConfirmado);
+		usuarios.save(usuario);
 		criarPadroes(usuario);
 		return usuario;
+	}
+
+	/**
+	 * Contas criadas antes do nome de usuário existir ganham um a partir do
+	 * e-mail (ex.: ana.souza@... vira "ana.souza", ou "ana.souza2" se já existir).
+	 * Roda na inicialização e não faz nada quando todas já têm.
+	 */
+	@Transactional
+	public int preencherUsernames() {
+		List<Usuario> semUsername = usuarios.findByUsernameIsNull();
+		semUsername.forEach(u -> u.setUsername(usernameLivre(u.getEmail())));
+		return semUsername.size();
+	}
+
+	private String usernameLivre(String email) {
+		int arroba = email.indexOf('@');
+		String base = (arroba > 0 ? email.substring(0, arroba) : email).toLowerCase(Locale.ROOT)
+				.replaceAll("[^a-z0-9._-]", "");
+		if (base.length() < 3) {
+			base = "usuario" + base;
+		}
+		base = base.substring(0, Math.min(base.length(), 25));
+		String candidato = base;
+		for (int i = 2; usuarios.existsByUsername(candidato); i++) {
+			candidato = base + i;
+		}
+		return candidato;
 	}
 
 	public void criarPadroes(Usuario usuario) {

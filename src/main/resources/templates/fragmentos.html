@@ -67,6 +67,24 @@
 </nav>
 
 <!-- Ícones (traço simples, no estilo Lucide do protótipo) -->
+<!-- Janela de escolha ao excluir um mês de receita fixa (usada na lista e na edição; app.js abre e preenche). -->
+<dialog th:fragment="excluirReceitaFixa" id="dlg-excluir-fixa" aria-labelledby="t-dlg-excluir">
+	<form class="dl" method="post" th:action="@{/receitas}">
+		<div class="dl-topo"><h2 id="t-dlg-excluir">Excluir receita fixa</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<p>O que deseja excluir de <strong data-nome>esta receita</strong>?</p>
+		<div class="escolhas">
+			<button class="btn" type="submit" name="modo" value="este">Só este mês<small>A receita fixa continua nos próximos meses.</small></button>
+			<button class="btn" type="submit" name="modo" value="seguintes">Este mês e os seguintes<small>Encerra a receita fixa. Os meses anteriores ficam no histórico.</small></button>
+		</div>
+		<div class="zona-perigo">
+			<label class="opcao"><input type="checkbox" name="confirmarTudo" value="true" data-ciente>Entendo que todos os meses, inclusive os anteriores, serão apagados</label>
+			<button class="btn btn-perigo" type="submit" name="modo" value="tudo" data-tudo disabled>Excluir tudo</button>
+		</div>
+		<div class="form-acoes"><button class="btn" type="button" data-fechar>Cancelar</button></div>
+	</form>
+</dialog>
+
 <th:block th:fragment="icone(nome)" th:switch="${nome}">
 	<svg th:case="'carteira'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12v4"/><path d="M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2z"/><circle cx="16" cy="14" r="1"/></svg>
 	<svg th:case="'painel'" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>

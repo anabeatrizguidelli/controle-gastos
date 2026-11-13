@@ -11,7 +11,7 @@
 		</div>
 		<div>
 			<h1 id="titulo-login">Entrar</h1>
-			<p class="suave">Acesse com seu e-mail e senha.</p>
+			<p class="suave">Acesse com seu e-mail ou nome de usuário e sua senha.</p>
 		</div>
 
 		<div class="aviso falha" role="alert" th:if="${param.erro}">
@@ -19,11 +19,12 @@
 		</div>
 		<div class="aviso sucesso" role="status" th:if="${param.saiu}">Você saiu do sistema.</div>
 		<div class="aviso sucesso" role="status" th:if="${sucesso}" th:text="${sucesso}">Conta criada.</div>
+		<div class="aviso falha" role="alert" th:if="${falha}" th:text="${falha}">Indisponível.</div>
 
 		<form id="form-login" th:action="@{/login}" method="post" novalidate>
-			<label>E-mail
-				<input id="email" name="email" type="email" autocomplete="username" placeholder="voce@exemplo.com"
-					data-obrigatorio="Informe seu e-mail." autofocus>
+			<label>E-mail ou nome de usuário
+				<input id="email" name="email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false"
+					placeholder="voce@exemplo.com ou seu.usuario" data-obrigatorio="Informe seu e-mail ou nome de usuário." autofocus>
 				<span class="erro" id="email-erro"></span>
 			</label>
 			<label>Senha
@@ -34,8 +35,8 @@
 			<button class="btn btn-p" type="submit"><span>Entrar</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block></button>
 		</form>
 
+		<p class="suave" th:if="${recuperacao}"><a th:href="@{/senha/esqueci}">Esqueci minha senha</a></p>
 		<p class="suave">Ainda não tem conta? <a th:href="@{/cadastro}">Criar conta</a></p>
-		<p class="dica">Conta de demonstração: <span class="mono">estudante@exemplo.com</span> / <span class="mono">senha123</span></p>
 	</section>
 </main>
 </body>

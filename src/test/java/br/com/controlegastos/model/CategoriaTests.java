@@ -17,6 +17,15 @@ class CategoriaTests {
 	}
 
 	@Test
+	void categoriaSemLimiteNuncaGeraAlerta() {
+		Categoria presentes = new Categoria("Presentes", 0);
+		assertThat(presentes.getTemLimite()).isFalse();
+		assertThat(presentes.calcularNivel(0)).isEqualTo("OK");
+		assertThat(presentes.calcularNivel(5000)).isEqualTo("OK");
+		assertThat(new Categoria("Lazer", 100).getTemLimite()).isTrue();
+	}
+
+	@Test
 	void pertenceAoMesComparaMesEAno() {
 		Despesa despesa = new Despesa("Pizza", 40, LocalDate.of(2026, 10, 15), new Categoria("Lazer", 100));
 		assertThat(despesa.pertenceAoMes(10, 2026)).isTrue();

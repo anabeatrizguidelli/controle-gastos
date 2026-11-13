@@ -22,7 +22,11 @@
 			<label>Nome
 				<input name="nome" th:value="${nome}" autocomplete="name" required maxlength="60">
 			</label>
-			<label>E-mail
+			<label>Nome de usuário <span class="dica-campo">3 a 30 caracteres: letras, números, ponto, hífen ou sublinhado</span>
+				<input name="usuario" th:value="${usuario}" autocomplete="username" autocapitalize="none" spellcheck="false"
+					required minlength="3" maxlength="30" pattern="[A-Za-z0-9._\-]{3,30}" placeholder="ex.: ana.souza">
+			</label>
+			<label>E-mail <span class="dica-campo" th:if="${recuperacao}">vamos enviar um código para confirmar</span>
 				<input name="email" type="email" th:value="${email}" autocomplete="email" required>
 			</label>
 			<div class="par">
@@ -37,6 +41,7 @@
 		</form>
 
 		<p class="suave">Já tem conta? <a th:href="@{/login}">Entrar</a></p>
+		<p class="dica" th:if="${modoDev}">Modo desenvolvimento: nenhum e-mail sai de verdade; o código aparece no log do app.</p>
 	</section>
 </main>
 </body>

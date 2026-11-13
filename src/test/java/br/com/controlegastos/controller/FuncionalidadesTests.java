@@ -73,6 +73,9 @@ class FuncionalidadesTests {
 		mvc.perform(get("/painel")).andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/login"));
 		mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(content().string(containsString("Entrar")));
+		// A tela de login não divulga a conta de demonstração.
+		mvc.perform(get("/login")).andExpect(content().string(not(containsString(DadosIniciais.EMAIL_DEMO))))
+				.andExpect(content().string(not(containsString(DadosIniciais.SENHA_DEMO))));
 	}
 
 	@Test
@@ -91,19 +94,21 @@ class FuncionalidadesTests {
 
 	@Test
 	void cadastroDeContaValidaOsCampos() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("email", "ana@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("usuario", "ana").param("email", "ana@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "654321"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("As senhas não conferem.")));
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("email", DadosIniciais.EMAIL_DEMO)
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("usuario", "ana").param("email", DadosIniciais.EMAIL_DEMO)
 				.param("senha", "123456").param("confirmacao", "123456"))
 				.andExpect(content().string(containsString("Já existe uma conta com esse e-mail.")));
 	}
 
 	@Test
 	void cadaUsuarioVeSomenteOsPropriosRegistros() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Bia").param("email", "bia@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Bia").param("usuario", "bia").param("email", "bia@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "123456"))
-				.andExpect(redirectedUrl("/login"));
+				.andExpect(status().is3xxRedirection());
+		// A confirmação do e-mail por código é testada em ContaTests; aqui a conta já entra confirmada.
+		usuarios.findByEmailIgnoreCase("bia@exemplo.com").orElseThrow().setEmailConfirmado(true);
 		Integer despesaDaDemo = despesas.findByUsuarioOrderByDataDescIdDesc(demo()).get(0).getId();
 
 		mvc.perform(get("/api/despesas").with(httpBasic("bia@exemplo.com", "123456")))
@@ -141,9 +146,58 @@ class FuncionalidadesTests {
 	void categoriaRepetidaOuInvalidaMostraErro() throws Exception {
 		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "lazer").param("limiteMensal", "50"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("Já existe uma categoria com esse nome")));
-		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "").param("limiteMensal", ""))
+		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "").param("temLimite", "true")
+				.param("limiteMensal", "abc"))
 				.andExpect(content().string(containsString("Informe o nome da categoria")))
 				.andExpect(content().string(containsString("Informe um limite válido")));
+	}
+
+	@Test
+	void limiteAtivadoExigeValorMaiorQueZero() throws Exception {
+		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "Viagem").param("temLimite", "true")
+				.param("limiteMensal", ""))
+				.andExpect(status().isOk()).andExpect(content().string(containsString("Informe um limite maior que zero")));
+		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "Viagem").param("temLimite", "true")
+				.param("limiteMensal", "0"))
+				.andExpect(status().isOk()).andExpect(content().string(containsString("Informe um limite maior que zero")));
+		assertThat(categorias.findByUsuarioOrderByNomeAsc(demo())).noneMatch(c -> c.getNome().equals("Viagem"));
+	}
+
+	@Test
+	void categoriaSemLimiteNaoTemRestricao() throws Exception {
+		// Formulário com a opção desmarcada: o navegador envia só o marcador "_temLimite".
+		mvc.perform(post("/categorias").with(DEMO).with(csrf()).param("nome", "Presentes").param("_temLimite", "on"))
+				.andExpect(redirectedUrl("/categorias"));
+		Categoria presentes = categoria("Presentes");
+		assertThat(presentes.getLimiteMensal()).isZero();
+		assertThat(presentes.getTemLimite()).isFalse();
+		assertThat(presentes.calcularNivel(1_000_000)).isEqualTo("OK");
+		mvc.perform(get("/categorias").with(DEMO))
+				.andExpect(content().string(containsString("Sem limite de gastos")));
+		mvc.perform(get("/categorias/{id}/editar", presentes.getId()).with(DEMO))
+				.andExpect(status().isOk()).andExpect(content().string(containsString("Definir limite máximo de gastos")));
+	}
+
+	@Test
+	void desativarLimiteAoEditarTiraOsAlertas() throws Exception {
+		Categoria lazer = categoria("Lazer");
+		assertThat(lazer.getTemLimite()).isTrue();
+		// Mesmo que o valor antigo ainda venha no formulário, sem a opção marcada o limite é removido.
+		mvc.perform(post("/categorias/{id}", lazer.getId()).with(DEMO).with(csrf()).param("nome", "Lazer")
+				.param("_temLimite", "on").param("limiteMensal", "100"))
+				.andExpect(redirectedUrl("/categorias"));
+		assertThat(lazer.getLimiteMensal()).isZero();
+		mvc.perform(get("/painel").with(DEMO).param("mes", "2026-10"))
+				.andExpect(content().string(not(containsString("Lazer chegou"))))
+				.andExpect(content().string(containsString("Sem limite de gastos")));
+
+		// Reativar com um valor volta a calcular o limite (o mês de outubro tem R$ 85 em Lazer).
+		mvc.perform(post("/categorias/{id}", lazer.getId()).with(DEMO).with(csrf()).param("nome", "Lazer")
+				.param("temLimite", "true").param("_temLimite", "on").param("limiteMensal", "100"))
+				.andExpect(redirectedUrl("/categorias"));
+		assertThat(lazer.getLimiteMensal()).isEqualTo(100);
+		mvc.perform(get("/painel").with(DEMO).param("mes", "2026-10"))
+				.andExpect(content().string(containsString("Lazer chegou a 85% do limite do mês.")));
 	}
 
 	@Test
@@ -164,6 +218,17 @@ class FuncionalidadesTests {
 				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.erro").value("Já existe uma categoria com esse nome"));
 		mvc.perform(get("/despesas/nova").with(DEMO))
 				.andExpect(content().string(containsString(">Saúde</option>")));
+	}
+
+	@Test
+	void cadastroRapidoAceitaCategoriaSemLimite() throws Exception {
+		mvc.perform(post("/api/categorias").with(DEMO).contentType(MediaType.APPLICATION_JSON)
+				.content("{\"nome\": \"Doações\", \"temLimite\": false, \"limiteMensal\": 50}"))
+				.andExpect(status().isCreated()).andExpect(jsonPath("$.temLimite").value(false))
+				.andExpect(jsonPath("$.limiteMensal").value(0.0));
+		mvc.perform(post("/api/categorias").with(DEMO).contentType(MediaType.APPLICATION_JSON)
+				.content("{\"nome\": \"Cursos\", \"temLimite\": true}"))
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.erro").value("Informe um limite maior que zero"));
 	}
 
 	// ---------- 3. receitas e fontes ----------
@@ -241,7 +306,7 @@ class FuncionalidadesTests {
 
 	@Test
 	void naoAceitaCategoriaDeOutroUsuario() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Caio").param("email", "caio@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Caio").param("usuario", "caio").param("email", "caio@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "123456"));
 		Categoria doCaio = categorias.findByUsuarioOrderByNomeAsc(usuarios.findByEmailIgnoreCase("caio@exemplo.com").orElseThrow()).get(0);
 		mvc.perform(post("/despesas").with(DEMO).with(csrf()).param("descricao", "Teste").param("valor", "10")

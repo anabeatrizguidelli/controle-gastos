@@ -32,14 +32,15 @@ import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.CadastroDespesas;
 import br.com.controlegastos.service.ControleGastos;
+import br.com.controlegastos.service.LancamentosFixos;
 import br.com.controlegastos.service.GerenciaCategorias;
 import br.com.controlegastos.service.GeradorParcelas;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 /**
- * Páginas para listar, cadastrar (à vista ou parcelado), editar, excluir e
- * marcar o pagamento de despesas.
+ * Páginas para listar, cadastrar (à vista, parcelada ou fixa), editar, excluir
+ * e marcar o pagamento de despesas.
  */
 @Controller
 @RequestMapping("/despesas")
@@ -52,14 +53,16 @@ public class DespesaController {
 	private final GerenciaCategorias categorias;
 	private final ControleGastos controle;
 	private final CadastroDespesas cadastro;
+	private final LancamentosFixos fixas;
 	private final UsuarioAtual usuarioAtual;
 
 	public DespesaController(DespesaRepository despesas, GerenciaCategorias categorias, ControleGastos controle,
-			CadastroDespesas cadastro, UsuarioAtual usuarioAtual) {
+			CadastroDespesas cadastro, LancamentosFixos fixas, UsuarioAtual usuarioAtual) {
 		this.despesas = despesas;
 		this.categorias = categorias;
 		this.controle = controle;
 		this.cadastro = cadastro;
+		this.fixas = fixas;
 		this.usuarioAtual = usuarioAtual;
 	}
 
@@ -67,6 +70,7 @@ public class DespesaController {
 	public String listar(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes,
 			Model model) {
 		YearMonth m = mes != null ? mes : YearMonth.now();
+		fixas.lancarAte(usuarioAtual.get(), m);
 		List<Despesa> lista = controle.listarDespesas(usuarioAtual.get(), m);
 		double total = lista.stream().mapToDouble(Despesa::getValor).sum();
 		double pagas = lista.stream().filter(Despesa::isPago).mapToDouble(Despesa::getValor).sum();
@@ -88,7 +92,7 @@ public class DespesaController {
 
 	@PostMapping
 	public String criar(@Valid @ModelAttribute("despesa") Despesa despesa, BindingResult erros,
-			@RequestParam(defaultValue = "1") Integer quantidadeParcelas,
+			@RequestParam(defaultValue = "1") Integer quantidadeParcelas, @RequestParam(defaultValue = "false") boolean fixa,
 			@RequestParam(required = false) String chaveFormulario, Model model, HttpSession sessao,
 			RedirectAttributes redirect) {
 		Usuario usuario = usuarioAtual.get();
@@ -101,21 +105,26 @@ public class DespesaController {
 		validarCategoria(despesa, usuario, erros);
 		// Sem vencimento informado, vale a data da despesa (getVencimento() já faz isso).
 		int quantidade = quantidadeParcelas == null ? 1 : quantidadeParcelas;
-		if (quantidade < 1 || quantidade > GeradorParcelas.MAXIMO_PARCELAS) {
+		if (fixa && quantidade != 1) {
+			model.addAttribute("erroParcelas", "Uma despesa fixa não pode ser parcelada. Use 1 parcela.");
+		} else if (quantidade < 1 || quantidade > GeradorParcelas.MAXIMO_PARCELAS) {
 			model.addAttribute("erroParcelas", "Informe de 1 a " + GeradorParcelas.MAXIMO_PARCELAS + " parcelas");
 		} else if (despesa.getValor() > 0 && Math.round(despesa.getValor() * 100) < quantidade) {
 			model.addAttribute("erroParcelas", "Cada parcela precisa ter pelo menos R$ 0,01");
 		}
 		if (erros.hasErrors() || model.containsAttribute("erroParcelas")) {
 			model.addAttribute("chaveFormulario", chaveFormulario);
+			model.addAttribute("fixa", fixa);
 			return formulario(despesa, null, quantidade, model);
 		}
-		List<Despesa> gravadas = cadastro.registrar(despesa, quantidade, usuario);
+		List<Despesa> gravadas = fixa ? List.of(cadastro.registrarFixa(despesa, usuario))
+				: cadastro.registrar(despesa, quantidade, usuario);
 		if (chaveFormulario != null) {
 			enviados.add(chaveFormulario);
 		}
 		Despesa primeira = gravadas.get(0);
-		redirect.addFlashAttribute("sucesso", quantidade == 1 ? "Despesa registrada."
+		redirect.addFlashAttribute("sucesso", fixa ? "Despesa fixa registrada. Ela será lançada todo mês até você encerrá-la."
+				: quantidade == 1 ? "Despesa registrada."
 				: "Despesa parcelada em " + quantidade + "x registrada. Primeira parcela vence em "
 						+ primeira.getVencimento().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ".");
 		return "redirect:/despesas?mes=" + YearMonth.from(primeira.getVencimento());
@@ -140,7 +149,10 @@ public class DespesaController {
 		int outras = cadastro.atualizar(existente, dados, aplicarDemaisPendentes);
 		String mensagem = existente.isParcelada() ? "Parcela " + existente.getRotuloParcela() + " atualizada."
 				: "Despesa atualizada.";
-		if (outras > 0) {
+		if (existente.isFixa()) {
+			mensagem = aplicarDemaisPendentes ? "Despesa fixa atualizada. O novo valor vale também para os próximos meses."
+					: "Despesa fixa atualizada só neste mês.";
+		} else if (outras > 0) {
 			mensagem += " Novo valor aplicado também a " + (outras == 1 ? "1 parcela pendente."
 					: outras + " parcelas pendentes.");
 		}
@@ -162,13 +174,22 @@ public class DespesaController {
 
 	@PostMapping("/{id}/excluir")
 	public String excluir(@PathVariable Integer id, @RequestParam(defaultValue = "false") boolean todas,
-			RedirectAttributes redirect) {
+			@RequestParam(defaultValue = "false") boolean encerrar, RedirectAttributes redirect) {
 		Despesa despesa = buscar(id);
 		boolean todasAsParcelas = todas && despesa.getParcelamento() != null;
 		YearMonth mes = YearMonth.from(despesa.getVencimento());
-		cadastro.excluir(despesa, todasAsParcelas);
 		String mensagem;
-		if (todasAsParcelas) {
+		if (encerrar && despesa.isFixa()) {
+			cadastro.encerrarFixa(despesa);
+			redirect.addFlashAttribute("sucesso", "Despesa fixa \"" + despesa.getDescricao() + "\" encerrada a partir de "
+					+ mes.format(DateTimeFormatter.ofPattern("MM/yyyy")) + ". Os meses anteriores continuam no histórico.");
+			return "redirect:/despesas?mes=" + mes;
+		}
+		cadastro.excluir(despesa, todasAsParcelas);
+		if (despesa.isFixa()) {
+			mensagem = "Despesa fixa \"" + despesa.getDescricao() + "\" excluída só em "
+					+ mes.format(DateTimeFormatter.ofPattern("MM/yyyy")) + ". Ela continua nos próximos meses.";
+		} else if (todasAsParcelas) {
 			mensagem = "Todas as " + despesa.getTotalParcelas() + " parcelas de \"" + despesa.getDescricao() + "\" foram excluídas.";
 		} else if (despesa.isParcelada()) {
 			mensagem = "Parcela " + despesa.getRotuloParcela() + " de \"" + despesa.getDescricao() + "\" excluída.";
@@ -195,8 +216,14 @@ public class DespesaController {
 		Despesa original = (Despesa) model.getAttribute("original");
 		long outrasPendentes = original == null ? 0L : cadastro.outrasParcelasPendentes(original);
 		model.addAttribute("outrasPendentes", outrasPendentes);
-		// Valor salvo da parcela, para a tela saber se o valor mudou antes de perguntar.
-		model.addAttribute("valorOriginal", outrasPendentes > 0 ? String.format(Locale.ROOT, "%.2f", original.getValor()) : null);
+		// Parcela com outras pendentes ou despesa fixa: ao mudar o valor, a tela pergunta se vale para as próximas.
+		boolean perguntar = outrasPendentes > 0 || (original != null && original.isFixa());
+		model.addAttribute("perguntarDemais", perguntar);
+		// Valor salvo, para a tela saber se o valor mudou antes de perguntar.
+		model.addAttribute("valorOriginal", perguntar ? String.format(Locale.ROOT, "%.2f", original.getValor()) : null);
+		if (!model.containsAttribute("fixa")) {
+			model.addAttribute("fixa", false);
+		}
 		if (id == null && model.getAttribute("chaveFormulario") == null) {
 			model.addAttribute("chaveFormulario", UUID.randomUUID().toString());
 		}

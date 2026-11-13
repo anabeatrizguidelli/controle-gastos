@@ -9,7 +9,7 @@
 		<header class="cabecalho">
 			<div>
 				<h1>Despesas</h1>
-				<p>Despesas e parcelas com vencimento no mês selecionado. Marque a caixa quando pagar.</p>
+				<p>Despesas, parcelas e despesas fixas com vencimento no mês selecionado. Marque a caixa quando pagar.</p>
 			</div>
 			<div class="acoes">
 				<nav th:replace="~{fragmentos :: meses('/despesas', ${mes})}"></nav>
@@ -29,7 +29,8 @@
 					<span class="ic" th:style="'--cor:' + ${@fmt.cor(d.categoria)}"><th:block th:replace="~{fragmentos :: icone(${d.categoria.nome})}"></th:block></span>
 					<div><span class="d" th:text="${d.descricao}">Descrição</span>
 						<span class="s"><th:block th:text="${d.categoria.nome}">Categoria</th:block> · <span class="parcela"
-							th:text="${d.parcelada} ? 'Parcela ' + ${d.rotuloParcela} : 'À vista'">À vista</span></span></div>
+							th:text="${d.parcelada} ? 'Parcela ' + ${d.rotuloParcela} : 'À vista'" th:unless="${d.fixa}">À vista</span><span
+							class="selo-fixa" th:if="${d.fixa}" title="Despesa fixa: lançada todo mês até ser encerrada">Fixa</span></span></div>
 					<span class="dt"><small>Vence</small> <th:block th:text="${@fmt.data(d.vencimento)}">01/01/2026</th:block></span>
 					<span class="val mono" th:text="${@fmt.moeda(d.valor)}">R$ 0,00</span>
 					<form class="pagar" th:action="@{/despesas/{id}/pagamento(id=${d.id})}" method="post">
@@ -47,7 +48,7 @@
 							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
 						<form th:action="@{/despesas/{id}/excluir(id=${d.id})}" method="post"
 							th:with="valorFmt=${@fmt.moeda(d.valor)}"
-							th:data-confirmar="${d.parcelada} ? 'Excluir só a parcela ' + ${d.rotuloParcela} + ' de &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')? As outras parcelas continuam lançadas. Para excluir todas, abra a edição.' : 'Excluir a despesa &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')?'">
+							th:data-confirmar="${d.fixa} ? 'Excluir só o lançamento deste mês de &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')? A despesa fixa continua nos próximos meses. Para encerrá-la, abra a edição.' : (${d.parcelada} ? 'Excluir só a parcela ' + ${d.rotuloParcela} + ' de &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')? As outras parcelas continuam lançadas. Para excluir todas, abra a edição.' : 'Excluir a despesa &quot;' + ${d.descricao} + '&quot; (' + ${valorFmt} + ')?')">
 							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${d.descricao}">
 								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
 						</form>

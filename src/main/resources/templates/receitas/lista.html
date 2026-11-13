@@ -9,7 +9,7 @@
 		<header class="cabecalho">
 			<div>
 				<h1>Receitas</h1>
-				<p>Dinheiro recebido no mês selecionado.</p>
+				<p>Dinheiro recebido no mês selecionado, incluindo as receitas fixas.</p>
 			</div>
 			<div class="acoes">
 				<nav th:replace="~{fragmentos :: meses('/receitas', ${mes})}"></nav>
@@ -27,14 +27,21 @@
 			<ul class="lancamentos">
 				<li th:each="r : ${receitas}" class="lan cor-r">
 					<span class="ic"><th:block th:replace="~{fragmentos :: icone('receita')}"></th:block></span>
-					<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s" th:text="${r.fonte.nome}">Fonte</span></div>
+					<div><span class="d" th:text="${r.descricao}">Descrição</span><span class="s"><th:block th:text="${r.fonte.nome}">Fonte</th:block><span
+						class="selo-fixa" th:if="${r.fixa}" title="Receita fixa: lançada todo mês até ser encerrada">Fixa</span></span></div>
 					<span class="dt" th:text="${@fmt.data(r.data)}">01/01/2026</span>
 					<span class="val mono pos" th:text="'+' + ${@fmt.moeda(r.valor)}">R$ 0,00</span>
 					<span class="botoes">
 						<a class="x" th:href="@{/receitas/{id}/editar(id=${r.id})}" title="Editar" th:aria-label="'Editar ' + ${r.descricao}">
 							<th:block th:replace="~{fragmentos :: icone('editar')}"></th:block></a>
-						<form th:action="@{/receitas/{id}/excluir(id=${r.id})}" method="post"
+						<form th:unless="${r.fixa}" th:action="@{/receitas/{id}/excluir(id=${r.id})}" method="post"
 							th:with="valorFmt=${@fmt.moeda(r.valor)}" th:data-confirmar="'Excluir a receita &quot;' + ${r.descricao} + '&quot; (' + ${valorFmt} + ')?'">
+							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${r.descricao}">
+								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
+						</form>
+						<!-- Receita fixa: abre a janela "só este mês / este e os seguintes / tudo". -->
+						<form th:if="${r.fixa}" th:action="@{/receitas/{id}/excluir(id=${r.id})}" method="post"
+							th:with="quando=${@fmt.data(r.data)}" th:data-excluir-fixa="${r.descricao} + ' (' + ${quando} + ')'">
 							<button class="x del" type="submit" title="Excluir" th:aria-label="'Excluir ' + ${r.descricao}">
 								<th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block></button>
 						</form>
@@ -51,5 +58,6 @@
 		</section>
 	</main>
 </div>
+<dialog th:replace="~{fragmentos :: excluirReceitaFixa}"></dialog>
 </body>
 </html>

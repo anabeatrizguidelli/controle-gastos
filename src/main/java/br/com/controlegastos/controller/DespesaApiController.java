@@ -1,6 +1,7 @@
 package br.com.controlegastos.controller;
 
 import java.net.URI;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +20,7 @@ import br.com.controlegastos.repository.CategoriaRepository;
 import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.CadastroDespesas;
+import br.com.controlegastos.service.LancamentosFixos;
 import jakarta.validation.Valid;
 
 /**
@@ -32,18 +34,22 @@ public class DespesaApiController {
 	private final CategoriaRepository categorias;
 	private final UsuarioAtual usuarioAtual;
 	private final CadastroDespesas cadastro;
+	private final LancamentosFixos fixas;
 
 	public DespesaApiController(DespesaRepository despesas, CategoriaRepository categorias, UsuarioAtual usuarioAtual,
-			CadastroDespesas cadastro) {
+			CadastroDespesas cadastro, LancamentosFixos fixas) {
 		this.despesas = despesas;
 		this.categorias = categorias;
 		this.usuarioAtual = usuarioAtual;
 		this.cadastro = cadastro;
+		this.fixas = fixas;
 	}
 
 	@GetMapping
 	public List<Despesa> listar() {
-		return despesas.listarTodas(usuarioAtual.get());
+		Usuario usuario = usuarioAtual.get();
+		fixas.lancarAte(usuario, YearMonth.now());
+		return despesas.listarTodas(usuario);
 	}
 
 	@GetMapping("/{id}")

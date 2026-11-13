@@ -48,6 +48,7 @@ public class DadosIniciais implements CommandLineRunner {
 	@Override
 	@Transactional
 	public void run(String... args) {
+		cadastro.preencherUsernames();
 		if (usuarios.findByEmailIgnoreCase(EMAIL_DEMO).isPresent()) {
 			return;
 		}

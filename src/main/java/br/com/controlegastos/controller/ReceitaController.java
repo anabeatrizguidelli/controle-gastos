@@ -2,7 +2,9 @@ package br.com.controlegastos.controller;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -24,27 +26,36 @@ import br.com.controlegastos.model.Receita;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.repository.ReceitaRepository;
 import br.com.controlegastos.seguranca.UsuarioAtual;
+import br.com.controlegastos.service.CadastroReceitas;
+import br.com.controlegastos.service.CadastroReceitas.Exclusao;
 import br.com.controlegastos.service.ControleGastos;
 import br.com.controlegastos.service.GerenciaFontes;
+import br.com.controlegastos.service.LancamentosFixos;
 import jakarta.validation.Valid;
 
 /**
- * Páginas para listar, cadastrar, editar e excluir receitas (RF2).
+ * Páginas para listar, cadastrar (avulsa ou fixa), editar e excluir receitas (RF2).
  */
 @Controller
 @RequestMapping("/receitas")
 public class ReceitaController {
 
+	private static final DateTimeFormatter MES = DateTimeFormatter.ofPattern("MM/yyyy");
+
 	private final ReceitaRepository receitas;
 	private final GerenciaFontes fontes;
 	private final ControleGastos controle;
+	private final CadastroReceitas cadastro;
+	private final LancamentosFixos fixos;
 	private final UsuarioAtual usuarioAtual;
 
 	public ReceitaController(ReceitaRepository receitas, GerenciaFontes fontes, ControleGastos controle,
-			UsuarioAtual usuarioAtual) {
+			CadastroReceitas cadastro, LancamentosFixos fixos, UsuarioAtual usuarioAtual) {
 		this.receitas = receitas;
 		this.fontes = fontes;
 		this.controle = controle;
+		this.cadastro = cadastro;
+		this.fixos = fixos;
 		this.usuarioAtual = usuarioAtual;
 	}
 
@@ -52,6 +63,7 @@ public class ReceitaController {
 	public String listar(@RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes,
 			Model model) {
 		YearMonth m = mes != null ? mes : YearMonth.now();
+		fixos.lancarAte(usuarioAtual.get(), m);
 		List<Receita> lista = controle.listarReceitas(usuarioAtual.get(), m);
 		model.addAttribute("mes", m);
 		model.addAttribute("receitas", lista);
@@ -67,16 +79,17 @@ public class ReceitaController {
 	}
 
 	@PostMapping
-	public String criar(@Valid @ModelAttribute("receita") Receita receita, BindingResult erros, Model model,
-			RedirectAttributes redirect) {
+	public String criar(@Valid @ModelAttribute("receita") Receita receita, BindingResult erros,
+			@RequestParam(defaultValue = "false") boolean fixa, Model model, RedirectAttributes redirect) {
 		Usuario usuario = usuarioAtual.get();
 		validarFonte(receita, usuario, erros);
 		if (erros.hasErrors()) {
+			model.addAttribute("fixa", fixa);
 			return formulario(receita, null, model);
 		}
-		receita.setUsuario(usuario);
-		receitas.save(receita);
-		redirect.addFlashAttribute("sucesso", "Receita registrada.");
+		cadastro.registrar(receita, fixa, usuario);
+		redirect.addFlashAttribute("sucesso", fixa ? "Receita fixa registrada. Ela será lançada todo mês até você encerrá-la."
+				: "Receita registrada.");
 		return "redirect:/receitas?mes=" + YearMonth.from(receita.getData());
 	}
 
@@ -87,30 +100,58 @@ public class ReceitaController {
 
 	@PostMapping("/{id}")
 	public String atualizar(@PathVariable Integer id, @Valid @ModelAttribute("receita") Receita dados,
-			BindingResult erros, Model model, RedirectAttributes redirect) {
+			BindingResult erros, @RequestParam(defaultValue = "false") boolean aplicarSeguintes, Model model,
+			RedirectAttributes redirect) {
 		Receita existente = buscar(id);
 		validarFonte(dados, existente.getUsuario(), erros);
 		if (erros.hasErrors()) {
+			model.addAttribute("original", existente);
 			return formulario(dados, id, model);
 		}
-		existente.setDescricao(dados.getDescricao());
-		existente.setValor(dados.getValor());
-		existente.setData(dados.getData());
-		existente.setFonte(dados.getFonte());
-		receitas.save(existente);
-		redirect.addFlashAttribute("sucesso", "Receita atualizada.");
+		cadastro.atualizar(existente, dados, aplicarSeguintes);
+		redirect.addFlashAttribute("sucesso", !existente.isFixa() ? "Receita atualizada."
+				: aplicarSeguintes ? "Receita fixa atualizada. O novo valor vale também para os meses seguintes."
+						: "Receita fixa atualizada só neste mês.");
 		return "redirect:/receitas?mes=" + YearMonth.from(existente.getData());
 	}
 
+	/**
+	 * Exclui a receita. Numa receita fixa, {@code modo} escolhe: "este" (só este mês),
+	 * "seguintes" (este e os seguintes, encerrando a receita fixa) ou "tudo" (todos os
+	 * meses, que exige também {@code confirmarTudo}).
+	 */
 	@PostMapping("/{id}/excluir")
-	public String excluir(@PathVariable Integer id, RedirectAttributes redirect) {
+	public String excluir(@PathVariable Integer id, @RequestParam(defaultValue = "este") String modo,
+			@RequestParam(defaultValue = "false") boolean confirmarTudo, RedirectAttributes redirect) {
 		Receita receita = buscar(id);
-		receitas.delete(receita);
-		redirect.addFlashAttribute("sucesso", "Receita \"" + receita.getDescricao() + "\" excluída.");
-		return "redirect:/receitas?mes=" + YearMonth.from(receita.getData());
+		YearMonth mes = YearMonth.from(receita.getData());
+		String nome = "\"" + receita.getDescricao() + "\"";
+		Exclusao exclusao = switch (modo) {
+			case "seguintes" -> Exclusao.ESTE_E_SEGUINTES;
+			case "tudo" -> Exclusao.TUDO;
+			default -> Exclusao.ESTE;
+		};
+		if (exclusao == Exclusao.TUDO && !confirmarTudo) {
+			redirect.addFlashAttribute("erro", "Para excluir todos os meses de " + nome + ", confirme que entende que os meses anteriores também serão apagados.");
+			return "redirect:/receitas?mes=" + mes;
+		}
+		cadastro.excluir(receita, exclusao);
+		String mensagem;
+		if (!receita.isFixa()) {
+			mensagem = "Receita " + nome + " excluída.";
+		} else if (exclusao == Exclusao.TUDO) {
+			mensagem = "Receita fixa " + nome + " excluída, com todos os meses.";
+		} else if (exclusao == Exclusao.ESTE_E_SEGUINTES) {
+			mensagem = "Receita fixa " + nome + " encerrada a partir de " + mes.format(MES)
+					+ ". Os meses anteriores continuam no histórico.";
+		} else {
+			mensagem = "Receita fixa " + nome + " excluída só em " + mes.format(MES) + ". Ela continua nos próximos meses.";
+		}
+		redirect.addFlashAttribute("sucesso", mensagem);
+		return "redirect:/receitas?mes=" + mes;
 	}
 
-	@InitBinder
+	@InitBinder("receita")
 	void camposPermitidos(WebDataBinder binder) {
 		binder.setAllowedFields("descricao", "valor", "data", "fonte");
 	}
@@ -118,6 +159,16 @@ public class ReceitaController {
 	private String formulario(Receita receita, Integer id, Model model) {
 		model.addAttribute("receita", receita);
 		model.addAttribute("idEdicao", id);
+		if (!model.containsAttribute("original")) {
+			model.addAttribute("original", id == null ? null : receita);
+		}
+		Receita original = (Receita) model.getAttribute("original");
+		// Valor salvo da receita fixa, para a tela perguntar "só este mês ou os seguintes" quando ele mudar.
+		model.addAttribute("valorOriginal", original != null && original.isFixa()
+				? String.format(Locale.ROOT, "%.2f", original.getValor()) : null);
+		if (!model.containsAttribute("fixa")) {
+			model.addAttribute("fixa", false);
+		}
 		model.addAttribute("fontes", fontes.listar(usuarioAtual.get()));
 		return "receitas/form";
 	}

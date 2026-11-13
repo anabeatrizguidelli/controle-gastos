@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import br.com.controlegastos.model.Fonte;
 import br.com.controlegastos.model.Receita;
+import br.com.controlegastos.model.RecorrenciaReceita;
 import br.com.controlegastos.model.Usuario;
 
 public interface ReceitaRepository extends JpaRepository<Receita, Integer> {
@@ -24,5 +25,12 @@ public interface ReceitaRepository extends JpaRepository<Receita, Integer> {
 	/** Soma das receitas do usuário com data anterior a {@code data}. */
 	@Query("select coalesce(sum(r.valor), 0) from Receita r where r.usuario = ?1 and r.data < ?2")
 	double somarAntesDe(Usuario usuario, LocalDate data);
+
+	/** Lançamentos de uma receita fixa com data depois de {@code data}. */
+	List<Receita> findByRecorrenciaAndDataAfter(RecorrenciaReceita recorrencia, LocalDate data);
+
+	List<Receita> findByRecorrencia(RecorrenciaReceita recorrencia);
+
+	long countByRecorrencia(RecorrenciaReceita recorrencia);
 
 }

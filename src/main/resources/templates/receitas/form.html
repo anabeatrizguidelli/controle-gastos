@@ -14,7 +14,13 @@
 		</header>
 
 		<form class="form painel" th:object="${receita}" method="post"
-			th:action="${idEdicao == null} ? @{/receitas} : @{/receitas/{id}(id=${idEdicao})}">
+			th:action="${idEdicao == null} ? @{/receitas} : @{/receitas/{id}(id=${idEdicao})}"
+			th:data-valor-original="${valorOriginal}">
+			<input type="hidden" name="aplicarSeguintes" value="false" data-aplicar-campo th:if="${valorOriginal != null}">
+			<p class="info-parcela" th:if="${original != null and original.fixa}">
+				<span class="selo-fixa">Fixa</span>
+				<span>Receita fixa mensal. As alterações valem só para este mês; se mudar o valor, você poderá aplicá-lo também aos meses seguintes.</span>
+			</p>
 			<label>Descrição
 				<input th:field="*{descricao}" placeholder="Ex.: Mesada de novembro" autocomplete="off" maxlength="120"
 					th:errorclass="invalido">
@@ -43,18 +49,39 @@
 				</div>
 				<span class="erro" th:if="${#fields.hasErrors('fonte')}" th:errors="*{fonte}"></span>
 			</div>
+			<label class="opcao" th:if="${idEdicao == null}"><input type="checkbox" name="fixa" value="true" th:checked="${fixa}">Receita fixa (repete todo mês)</label>
+			<p class="suave dica-campo" th:if="${idEdicao == null}">A receita fixa é lançada todo mês, no mesmo dia (no último dia, quando o mês
+				for mais curto), até você encerrá-la. Os meses anteriores ficam no histórico.</p>
 			<div class="form-acoes">
 				<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Salvar receita' : 'Salvar alterações'">Salvar receita</button>
 				<a class="btn" th:href="@{/receitas}">Cancelar</a>
 			</div>
 		</form>
 
-		<form th:if="${idEdicao != null}" th:action="@{/receitas/{id}/excluir(id=${idEdicao})}" method="post"
+		<form th:if="${idEdicao != null and !original.fixa}" th:action="@{/receitas/{id}/excluir(id=${idEdicao})}" method="post"
 			data-confirmar="Excluir esta receita? Essa ação não pode ser desfeita.">
+			<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Excluir receita</button>
+		</form>
+		<form th:if="${idEdicao != null and original.fixa}" th:action="@{/receitas/{id}/excluir(id=${idEdicao})}" method="post"
+			th:with="quando=${@fmt.data(original.data)}" th:data-excluir-fixa="${original.descricao} + ' (' + ${quando} + ')'">
 			<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Excluir receita</button>
 		</form>
 	</main>
 </div>
+
+<dialog data-pergunta-demais th:if="${valorOriginal != null}" aria-labelledby="t-dlg-seguintes">
+	<div class="dl">
+		<div class="dl-topo"><h2 id="t-dlg-seguintes">Alterar os meses seguintes?</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<p>Deseja aplicar este novo valor também aos meses seguintes desta receita fixa?</p>
+		<p class="suave"><strong>Só este mês:</strong> os outros meses mantêm o valor atual.<br>
+			<strong>Este e os seguintes:</strong> os meses seguintes (já lançados e futuros) passam a valer
+			<strong class="mono" data-novo-valor>R$ 0,00</strong>.<br>
+			Meses anteriores não são alterados.</p>
+		<div class="form-acoes"><button class="btn btn-p" type="button" data-aplicar="true">Este mês e os seguintes</button><button class="btn" type="button" data-aplicar="false">Só este mês</button></div>
+	</div>
+</dialog>
+<th:block th:if="${original != null and original.fixa}"><dialog th:replace="~{fragmentos :: excluirReceitaFixa}"></dialog></th:block>
 
 <dialog id="dlg-fonte" aria-labelledby="t-dlg-fonte">
 	<form class="dl" data-api="/api/fontes" data-select="fonte" data-sucesso="Fonte &quot;{nome}&quot; criada e selecionada.">

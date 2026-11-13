@@ -45,6 +45,19 @@
 		});
 	}
 
+	// Categoria: a opção "Definir limite máximo de gastos" mostra/esconde o campo do valor.
+	// Campo escondido fica desativado, então não é enviado nem validado pelo navegador.
+	function limite(chk) {
+		const campo = chk.form.querySelector('[data-limite-valor]');
+		if (!campo) return;
+		campo.hidden = !chk.checked;
+		campo.querySelector('input').disabled = !chk.checked;
+	}
+	document.querySelectorAll('[data-limite]').forEach(chk => {
+		limite(chk);
+		chk.addEventListener('change', () => { limite(chk); if (chk.checked) chk.form.querySelector('[data-limite-valor] input').focus(); });
+	});
+
 	// Cadastro rápido: abre o diálogo, envia para a API e já seleciona o item criado.
 	document.querySelectorAll('[data-rapido]').forEach(botao => {
 		const dialogo = document.getElementById(botao.dataset.rapido);
@@ -52,7 +65,7 @@
 		const select = document.getElementById(form.dataset.select);
 		const erro = form.querySelector('.erro');
 
-		botao.addEventListener('click', () => { form.reset(); erro.textContent = ''; dialogo.showModal(); form.querySelector('input').focus(); });
+		botao.addEventListener('click', () => { form.reset(); form.querySelectorAll('[data-limite]').forEach(limite); erro.textContent = ''; dialogo.showModal(); form.querySelector('input').focus(); });
 		dialogo.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dialogo.close()));
 		dialogo.addEventListener('click', e => { if (e.target === dialogo) dialogo.close(); });
 
@@ -60,6 +73,7 @@
 			e.preventDefault();
 			const dados = {};
 			new FormData(form).forEach((v, k) => dados[k] = k === 'limiteMensal' ? parseFloat(String(v).replace(',', '.')) || 0 : v);
+			if (form.elements.temLimite) dados.temLimite = form.elements.temLimite.checked;
 			try {
 				const resp = await fetch(form.dataset.api, {
 					method: 'POST', credentials: 'same-origin',
@@ -94,13 +108,15 @@
 	// Edição de parcela: se o valor mudou e a compra tem outras parcelas pendentes,
 	// pergunta se o novo valor vale também para elas (Sim/Não) antes de salvar.
 	// Precisa vir antes do "enviar uma vez" para que o botão não fique desativado.
-	const dlgParcelas = $('#dlg-demais-parcelas'), formDespesa = $('#form-despesa'), aplicar = $('#aplicarDemaisPendentes');
-	if (dlgParcelas && formDespesa && aplicar && formDespesa.dataset.valorOriginal) {
+	// Vale também para despesas e receitas fixas ("só este mês" ou "os próximos meses").
+	const dlgParcelas = $('dialog[data-pergunta-demais]'), formDespesa = $('form[data-valor-original]');
+	const aplicar = formDespesa && formDespesa.querySelector('[data-aplicar-campo]');
+	if (dlgParcelas && formDespesa && aplicar) {
 		const centavosDe = v => Math.round(parseFloat(String(v).replace(',', '.')) * 100);
 		let decidido = false;
 		formDespesa.addEventListener('submit', e => {
 			if (decidido) return;
-			const novo = centavosDe($('#valor').value);
+			const novo = centavosDe(formDespesa.querySelector('[name="valor"]').value);
 			if (!(novo > 0) || novo === centavosDe(formDespesa.dataset.valorOriginal)) { aplicar.value = 'false'; return; }
 			e.preventDefault();
 			dlgParcelas.querySelector('[data-novo-valor]').textContent =
@@ -118,11 +134,40 @@
 		dlgParcelas.addEventListener('click', e => { if (e.target === dlgParcelas) dlgParcelas.close(); });
 	}
 
+	// Receita fixa: o botão de excluir abre a janela de escolha (só este mês, este e os
+	// seguintes, ou tudo). "Excluir tudo" só libera depois de marcar a confirmação.
+	const dlgExcluir = $('#dlg-excluir-fixa');
+	if (dlgExcluir) {
+		const formEscolha = dlgExcluir.querySelector('form'), tudo = dlgExcluir.querySelector('[data-tudo]'),
+			ciente = dlgExcluir.querySelector('[data-ciente]');
+		document.querySelectorAll('form[data-excluir-fixa]').forEach(f => f.addEventListener('submit', e => {
+			e.preventDefault();
+			formEscolha.action = f.action;
+			dlgExcluir.querySelector('[data-nome]').textContent = f.dataset.excluirFixa;
+			ciente.checked = false; tudo.disabled = true;
+			dlgExcluir.showModal();
+		}));
+		ciente.addEventListener('change', () => tudo.disabled = !ciente.checked);
+		dlgExcluir.querySelectorAll('[data-fechar]').forEach(b => b.addEventListener('click', () => dlgExcluir.close()));
+		dlgExcluir.addEventListener('click', e => { if (e.target === dlgExcluir) dlgExcluir.close(); });
+	}
+
 	// Evita clique duplo no "Salvar" (o servidor também ignora o mesmo formulário enviado duas vezes).
 	document.querySelectorAll('[data-enviar-uma-vez]').forEach(botao => botao.form.addEventListener('submit', e => {
 		if (e.defaultPrevented) return;
 		setTimeout(() => botao.disabled = true, 0);
 	}));
+
+	// Despesa fixa não é parcelada: marcar "fixa" volta para 1 parcela e trava o campo.
+	const fixa = $('[data-fixa]'), qtdParcelas = $('#quantidadeParcelas'), dicaFixa = $('[data-fixa-dica]');
+	if (fixa && qtdParcelas) {
+		const travar = () => {
+			if (fixa.checked) { qtdParcelas.value = '1'; qtdParcelas.dispatchEvent(new Event('input')); }
+			qtdParcelas.disabled = fixa.checked;
+			if (dicaFixa) dicaFixa.hidden = !fixa.checked;
+		};
+		fixa.addEventListener('change', travar); travar();
+	}
 
 	// Prévia das parcelas: "3x: 1x de R$ 33,34 e 2x de R$ 33,33".
 	const qtd = $('#quantidadeParcelas'), valor = $('#valor'), previa = $('#previa-parcelas');
