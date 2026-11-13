@@ -1,0 +1,16 @@
+Teste 06 - Nome de usuario com @ e nome duplicado
+Data: 2026-11-13 16:39:49 (America/Sao_Paulo)
+
+A) POST /cadastro com usuario=nao@valido
+Resultado esperado: a conta nao e criada; a tela de cadastro volta com mensagem pedindo usuario sem @.
+Resultado obtido: HTTP 200, Location=
+Mensagem de rejeicao do @: sim
+Trecho: class="aviso falha" role="alert"> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg> <span>O nome de usuário deve ter de 3 a 3
+
+B) POST /cadastro com usuario=validacao.1639 (ja existente) e e-mail novo
+Resultado esperado: a conta nao e criada; mensagem de nome de usuario ja em uso.
+Resultado obtido: HTTP 200, Location=
+Mensagem de duplicidade: sim
+Trecho: class="aviso falha" role="alert"> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg> <span>Esse nome de usuário já está em uso
+
+Situacao: passou

@@ -1,0 +1,10 @@
+Resumo dos testes funcionais - 2026-11-13 16:41:03 (America/Sao_Paulo)
+
+Teste 01 - Cadastro com confirmacao de e-mail e login: passou | HTTP cadastro=302, confirmar=302, login=302, painel=200
+Teste 02 - Login com senha errada: passou | HTTP 302 Location=http://localhost:8080/login?erro
+Teste 03 - Categoria com limite e despesa que ultrapassa o limite: passou | alerta de limite estourado no painel
+Teste 04 - Receita fixa, despesas fixas e saldo projetado: passou | resultado=R$ 100,00; receitas=+ R$ 300,00; pendentes=− R$ 200,00
+Teste 05 - Esqueci minha senha (usuario + e-mail): passou | redefinir=302; senha antiga recusada; senha nova entra no painel
+Teste 06 - Nome de usuario com @ e nome duplicado: passou | ambas as tentativas rejeitadas com HTTP 200 na tela de cadastro
+
+Total: 6 | passou=6 | falhou=0

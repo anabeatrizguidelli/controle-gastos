@@ -1,0 +1,26 @@
+Teste 01 - Cadastro com confirmacao de e-mail e login
+Data: 2026-11-13 16:39:47 (America/Sao_Paulo)
+
+1) GET /cadastro
+HTTP 302 na etapa de POST (cadastro). Location: http://localhost:8080/confirmar?login=validacao.1639%40exemplo.com
+Acao: POST /cadastro
+Campos: nome=Validacao Um, usuario=validacao.1639, email=validacao.1639@exemplo.com, senha=*** confirmacao=***
+Resultado esperado: HTTP 302 para /confirmar, com codigo de 6 digitos no log local.
+Resultado obtido: HTTP 302, Location=http://localhost:8080/confirmar?login=validacao.1639%40exemplo.com
+
+2) Codigo no log (mascarado)
+2026-11-13T16:39:46.444-03:00  INFO 10480 --- [controle-gastos] [nio-8080-exec-9] b.com.controlegastos.service.EnvioEmail  : [modo desenvolvimento] E-mail para validacao.1639@exemplo.com | Seu código de confirmação - Finora | Olá, Validacao Um!  Seu código para confirmar o e-mail no Finora é: ****** Ele vale por 15 minutos e só pode ser usado uma vez. Se não foi você quem pediu, é só ignorar este e-mail.
+
+3) POST /confirmar
+Campos: login=validacao.1639@exemplo.com, codigo=***
+Resultado esperado: HTTP 302 para /login (e-mail confirmado).
+Resultado obtido: HTTP 302, Location=http://localhost:8080/login
+
+4) POST /login com nome de usuario e senha correta
+Resultado esperado: HTTP 302 para /painel; GET /painel retorna 200 e mostra @validacao.1639.
+Resultado obtido: HTTP 302, Location=http://localhost:8080/painel
+GET /painel: HTTP 200
+Trecho do painel: Saldo projetado ao final de novembro de 2026</h2> <span class="suave dica-campo">Se todas
+Menu usuario: @validacao.1639 presente
+
+Situacao: passou

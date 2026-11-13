@@ -1,0 +1,12 @@
+Teste 02 - Login com senha errada
+Data: 2026-11-13 16:39:48 (America/Sao_Paulo)
+
+Acao: POST /login
+Campos: email=validacao.1639 (nome de usuario valido), senha=*** (senha incorreta)
+Resultado esperado: HTTP 302 para /login?erro; a tela mostra aviso de e-mail ou senha invalidos; nao entra no painel.
+Resultado obtido: HTTP 302, Location=http://localhost:8080/login?erro
+GET da pagina de erro: HTTP 200
+Aviso visivel: sim, "E-mail ou senha invalidos"
+Trecho: class="aviso falha" role="alert"> <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.01"/></svg>
+
+Situacao: passou

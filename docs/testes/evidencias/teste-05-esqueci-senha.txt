@@ -1,0 +1,18 @@
+Teste 05 - Esqueci minha senha (usuario + e-mail)
+Data: 2026-11-13 16:39:53 (America/Sao_Paulo)
+
+Acao:
+- GET /senha/esqueci
+- POST /senha/esqueci com usuario=validacao.1639 e email=validacao.1639@exemplo.com
+- Codigo de 6 digitos lido do log local (mascarado)
+- POST /senha/redefinir com nova senha
+- Tentativa de login com a senha antiga e com a nova
+
+Resultado esperado: mensagem neutra de envio; redefinicao redireciona para /login; senha antiga deixa de funcionar; senha nova entra no painel.
+HTTP pedido: 302 Location=http://localhost:8080/senha/redefinir?login=validacao.1639
+Trecho do log (mascarado): 2026-11-13T16:39:52.809-03:00  INFO 10480 --- [controle-gastos] [nio-8080-exec-3] b.com.controlegastos.service.EnvioEmail  : [modo desenvolvimento] E-mail para validacao.1639@exemplo.com | Código para redefinir sua senha - Finora | Olá, Validacao Um!  Seu código para redefinir a senha no Finora é: ****** Ele vale por 15 minutos e só pode ser usado uma vez. Se não foi você quem pediu, é só ignorar este e-mail.
+HTTP redefinicao: 302 Location=http://localhost:8080/login
+Login com senha antiga: HTTP 302 Location=http://localhost:8080/login?erro (esperado /login?erro)
+Login com senha nova: HTTP 302 Location=http://localhost:8080/painel (esperado /painel)
+
+Situacao: passou
