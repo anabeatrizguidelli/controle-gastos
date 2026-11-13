@@ -50,6 +50,11 @@ public class ControleGastos {
 		return despesas.listarPorVencimento(usuario, mes.atDay(1), mes.atEndOfMonth());
 	}
 
+	/** Receitas, despesas (pagas + pendentes) e saldo projetado do mês. */
+	public TotaisMes totaisDoMes(Usuario usuario, YearMonth mes) {
+		return TotaisMes.de(listarReceitas(usuario, mes), listarDespesas(usuario, mes));
+	}
+
 	public List<Receita> listarReceitas(Usuario usuario, YearMonth mes) {
 		return receitas.findByUsuarioAndDataBetweenOrderByDataDescIdDesc(usuario, mes.atDay(1), mes.atEndOfMonth());
 	}
@@ -101,7 +106,11 @@ public class ControleGastos {
 	 * também aparecem, para mostrar o limite disponível.
 	 */
 	public List<ResumoCategoria> resumoPorCategoria(Usuario usuario, YearMonth mes) {
-		List<Despesa> doMes = listarDespesas(usuario, mes);
+		return resumoPorCategoria(usuario, listarDespesas(usuario, mes));
+	}
+
+	/** Igual ao anterior, a partir das despesas do mês já carregadas. */
+	public List<ResumoCategoria> resumoPorCategoria(Usuario usuario, List<Despesa> doMes) {
 		double totalMes = somarDespesas(doMes);
 		List<ResumoCategoria> resumo = new ArrayList<>();
 		for (Categoria c : categorias.findByUsuarioOrderByNomeAsc(usuario)) {
@@ -115,7 +124,12 @@ public class ControleGastos {
 	}
 
 	public List<Alerta> verificarAlertas(Usuario usuario, int mes, int ano) {
-		return resumoPorCategoria(usuario, YearMonth.of(ano, mes)).stream()
+		return alertas(resumoPorCategoria(usuario, YearMonth.of(ano, mes)));
+	}
+
+	/** Alertas de limite a partir do resumo por categoria já calculado. */
+	public static List<Alerta> alertas(List<ResumoCategoria> resumo) {
+		return resumo.stream()
 				.filter(r -> !"OK".equals(r.nivel()))
 				.map(r -> new Alerta(r.categoria().getNome(), r.nivel(), r.percentualLimite(), r.total(),
 						r.categoria().getLimiteMensal()))

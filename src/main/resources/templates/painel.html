@@ -41,6 +41,28 @@
 				<span class="det">Saldo anterior + receitas − despesas pagas</span></div>
 		</section>
 
+		<section class="painel bloco projecao" aria-labelledby="t-proj" th:with="sobra=${saldoProjetado >= 0}">
+			<div class="bloco-topo">
+				<h2 class="titulo" id="t-proj" th:text="'Saldo projetado ao final de ' + ${@fmt.mes(mes).toLowerCase()}">Saldo projetado ao final do mês</h2>
+				<span class="suave dica-campo">Se todas as despesas do mês forem pagas</span>
+			</div>
+			<div class="projecao-corpo">
+				<dl class="conta">
+					<div><dt>Receitas do mês</dt><dd class="mono pos" th:text="'+ ' + ${@fmt.moeda(receitas)}">+ R$ 0,00</dd></div>
+					<div><dt><i class="ponto-st pago"></i>Despesas pagas</dt><dd class="mono" th:text="'− ' + ${@fmt.moeda(despesasPagas)}">− R$ 0,00</dd></div>
+					<div><dt><i class="ponto-st pendente"></i>Despesas pendentes</dt><dd class="mono" th:text="'− ' + ${@fmt.moeda(despesasPendentes)}">− R$ 0,00</dd></div>
+					<div class="total"><dt>Resultado</dt><dd class="mono" th:classappend="${sobra} ? 'pos' : 'neg'"
+						th:text="${@fmt.moeda(saldoProjetado)}">R$ 0,00</dd></div>
+				</dl>
+				<p class="projecao-final" th:classappend="${sobra} ? 'sobra' : 'falta'" role="status">
+					<th:block th:if="${sobra}"><strong class="mono" th:text="${@fmt.moeda(saldoProjetado)}">R$ 0,00</strong>
+						<span>disponíveis ao final do mês</span></th:block>
+					<th:block th:unless="${sobra}"><span>Faltarão</span> <strong class="mono" th:text="${@fmt.moeda(-saldoProjetado)}">R$ 0,00</strong>
+						<span>para pagar todas as contas do mês</span></th:block>
+				</p>
+			</div>
+		</section>
+
 		<div class="grade2">
 			<section class="painel bloco" aria-labelledby="t-pizza">
 				<div class="bloco-topo"><h2 class="titulo" id="t-pizza">Despesas por categoria</h2></div>
