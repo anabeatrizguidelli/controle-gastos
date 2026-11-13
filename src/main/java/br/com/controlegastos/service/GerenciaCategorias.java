@@ -10,6 +10,7 @@ import br.com.controlegastos.model.Categoria;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.repository.CategoriaRepository;
 import br.com.controlegastos.repository.DespesaRepository;
+import br.com.controlegastos.repository.RecorrenciaRepository;
 
 /**
  * Regras de cadastro de categorias, usadas pelas páginas e pela API.
@@ -19,10 +20,13 @@ public class GerenciaCategorias {
 
 	private final CategoriaRepository categorias;
 	private final DespesaRepository despesas;
+	private final RecorrenciaRepository recorrencias;
 
-	public GerenciaCategorias(CategoriaRepository categorias, DespesaRepository despesas) {
+	public GerenciaCategorias(CategoriaRepository categorias, DespesaRepository despesas,
+			RecorrenciaRepository recorrencias) {
 		this.categorias = categorias;
 		this.despesas = despesas;
+		this.recorrencias = recorrencias;
 	}
 
 	public List<Categoria> listar(Usuario usuario) {
@@ -68,7 +72,7 @@ public class GerenciaCategorias {
 
 	/** @return mensagem de erro, ou {@code null} se excluiu. */
 	public String excluir(Categoria categoria) {
-		if (despesas.existsByCategoria(categoria)) {
+		if (despesas.existsByCategoria(categoria) || recorrencias.existsByCategoria(categoria)) {
 			return "A categoria \"" + categoria.getNome()
 					+ "\" tem despesas lançadas. Mova ou exclua essas despesas antes de excluí-la.";
 		}

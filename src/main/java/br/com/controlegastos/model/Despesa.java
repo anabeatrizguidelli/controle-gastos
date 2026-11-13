@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,8 +19,9 @@ import jakarta.validation.constraints.Positive;
 
 /**
  * Despesa registrada pelo estudante (RF1). Cada registro é um lançamento com
- * vencimento próprio: uma despesa à vista ou uma parcela de uma compra
- * parcelada ({@link Parcelamento}).
+ * vencimento próprio: uma despesa à vista, uma parcela de uma compra
+ * parcelada ({@link Parcelamento}) ou o lançamento de um mês de uma despesa
+ * fixa ({@link Recorrencia}). Uma despesa não é fixa e parcelada ao mesmo tempo.
  * <p>
  * Os campos {@code vencimento}, {@code pago}, {@code numeroParcela},
  * {@code totalParcelas} e {@code parcelamento} foram adicionados depois e
@@ -63,6 +65,11 @@ public class Despesa {
 	@JsonIgnore
 	@ManyToOne
 	private Parcelamento parcelamento;
+
+	/** Despesa fixa da qual este lançamento faz parte. Nulo nas demais (coluna nova, aceita nulo). */
+	@JsonIgnore
+	@ManyToOne(fetch = FetchType.LAZY)
+	private Recorrencia recorrencia;
 
 	@NotNull(message = "Escolha uma categoria")
 	@ManyToOne
@@ -108,14 +115,25 @@ public class Despesa {
 		this.totalParcelas = null;
 	}
 
+	/** Liga este lançamento a uma despesa fixa (e tira qualquer informação de parcela). */
+	public void vincularRecorrencia(Recorrencia recorrencia) {
+		desvincularParcela();
+		this.recorrencia = recorrencia;
+	}
+
+	/** Lançamento de uma despesa fixa (mensal). Não carrega a recorrência do banco. */
+	public boolean isFixa() {
+		return recorrencia != null;
+	}
+
 	public boolean isParcelada() {
 		return totalParcelas != null && totalParcelas > 1;
 	}
 
-	/** Ex.: "3/14" ou "À vista". */
+	/** Ex.: "3/14", "Fixa" ou "À vista". */
 	@JsonIgnore
 	public String getRotuloParcela() {
-		return isParcelada() ? numeroParcela + "/" + totalParcelas : "À vista";
+		return isParcelada() ? numeroParcela + "/" + totalParcelas : isFixa() ? "Fixa" : "À vista";
 	}
 
 	/** "Pago" ou "Pendente". */
@@ -190,6 +208,16 @@ public class Despesa {
 	/** Id da compra parcelada (aparece na API); nulo nas despesas à vista. */
 	public Integer getParcelamentoId() {
 		return parcelamento == null ? null : parcelamento.getId();
+	}
+
+	@JsonIgnore
+	public Recorrencia getRecorrencia() {
+		return recorrencia;
+	}
+
+	/** Id da despesa fixa (aparece na API); nulo nas demais. */
+	public Integer getRecorrenciaId() {
+		return recorrencia == null ? null : recorrencia.getId();
 	}
 
 	public Categoria getCategoria() {

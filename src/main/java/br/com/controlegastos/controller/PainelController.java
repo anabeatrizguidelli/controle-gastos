@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.seguranca.UsuarioAtual;
 import br.com.controlegastos.service.ControleGastos;
+import br.com.controlegastos.service.DespesasFixas;
 import br.com.controlegastos.service.ResumoCategoria;
 import br.com.controlegastos.service.ResumoMes;
 
@@ -22,10 +23,12 @@ import br.com.controlegastos.service.ResumoMes;
 public class PainelController {
 
 	private final ControleGastos controle;
+	private final DespesasFixas fixas;
 	private final UsuarioAtual usuarioAtual;
 
-	public PainelController(ControleGastos controle, UsuarioAtual usuarioAtual) {
+	public PainelController(ControleGastos controle, DespesasFixas fixas, UsuarioAtual usuarioAtual) {
 		this.controle = controle;
+		this.fixas = fixas;
 		this.usuarioAtual = usuarioAtual;
 	}
 
@@ -34,6 +37,7 @@ public class PainelController {
 			Model model) {
 		YearMonth m = mes != null ? mes : YearMonth.now();
 		Usuario usuario = usuarioAtual.get();
+		fixas.lancarAte(usuario, m);
 		List<ResumoCategoria> categorias = controle.resumoPorCategoria(usuario, m);
 		List<ResumoMes> historico = controle.historico(usuario, m, 6);
 		double maiorDoHistorico = historico.stream()

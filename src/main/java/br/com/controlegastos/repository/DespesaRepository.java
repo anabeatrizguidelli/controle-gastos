@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import br.com.controlegastos.model.Categoria;
 import br.com.controlegastos.model.Despesa;
 import br.com.controlegastos.model.Parcelamento;
+import br.com.controlegastos.model.Recorrencia;
 import br.com.controlegastos.model.Usuario;
 
 /**
@@ -50,5 +51,10 @@ public interface DespesaRepository extends JpaRepository<Despesa, Integer> {
 	long countByParcelamento(Parcelamento parcelamento);
 
 	List<Despesa> findByUsuarioIsNull();
+
+	/** Lançamentos pendentes de uma despesa fixa que vencem depois de {@code data}. */
+	List<Despesa> findByRecorrenciaAndVencimentoAfterAndPagoFalse(Recorrencia recorrencia, LocalDate data);
+
+	long countByRecorrencia(Recorrencia recorrencia);
 
 }

@@ -3,6 +3,7 @@ package br.com.controlegastos.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,22 +12,61 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.controlegastos.model.Despesa;
 import br.com.controlegastos.model.Parcelamento;
+import br.com.controlegastos.model.Recorrencia;
 import br.com.controlegastos.model.Usuario;
 import br.com.controlegastos.repository.DespesaRepository;
 import br.com.controlegastos.repository.ParcelamentoRepository;
+import br.com.controlegastos.repository.RecorrenciaRepository;
 
 /**
- * Cadastro de despesas à vista e parceladas, pagamento de parcelas e exclusão.
+ * Cadastro de despesas à vista, parceladas e fixas, pagamento de parcelas e exclusão.
  */
 @Service
 public class CadastroDespesas {
 
 	private final DespesaRepository despesas;
 	private final ParcelamentoRepository parcelamentos;
+	private final RecorrenciaRepository recorrencias;
 
-	public CadastroDespesas(DespesaRepository despesas, ParcelamentoRepository parcelamentos) {
+	public CadastroDespesas(DespesaRepository despesas, ParcelamentoRepository parcelamentos,
+			RecorrenciaRepository recorrencias) {
 		this.despesas = despesas;
 		this.parcelamentos = parcelamentos;
+		this.recorrencias = recorrencias;
+	}
+
+	/**
+	 * Registra uma despesa fixa (mensal): grava o primeiro mês, no vencimento
+	 * informado, e a recorrência que lança os meses seguintes (ver {@link DespesasFixas}).
+	 */
+	@Transactional
+	public Despesa registrarFixa(Despesa dados, Usuario usuario) {
+		dados.setUsuario(usuario);
+		dados.setVencimento(dados.getVencimento());
+		dados.setValor(emCentavos(dados.getValor()).doubleValue());
+		dados.setPago(false);
+		Recorrencia fixa = recorrencias.save(new Recorrencia(dados, usuario));
+		dados.vincularRecorrencia(fixa);
+		return despesas.save(dados);
+	}
+
+	/**
+	 * Encerra a despesa fixa a partir do mês deste lançamento: ele e os meses
+	 * seguintes ainda pendentes são excluídos e nenhum mês novo é lançado. Os
+	 * meses anteriores (e qualquer mês já pago) continuam no histórico.
+	 */
+	@Transactional
+	public void encerrarFixa(Despesa despesa) {
+		Recorrencia fixa = despesa.getRecorrencia();
+		fixa.encerrar(YearMonth.from(despesa.getVencimento()).minusMonths(1));
+		recorrencias.save(fixa);
+		List<Despesa> seguintes = despesas.findByRecorrenciaAndVencimentoAfterAndPagoFalse(fixa, despesa.getVencimento());
+		despesas.deleteAll(seguintes);
+		despesas.delete(despesa);
+		despesas.flush();
+		if (despesas.countByRecorrencia(fixa) == 0) {
+			recorrencias.delete(fixa);
+		}
 	}
 
 	/**
@@ -87,6 +127,9 @@ public class CadastroDespesas {
 		}
 		existente.setCategoria(dados.getCategoria());
 		despesas.save(existente);
+		if (existente.isFixa()) {
+			return aplicarNaFixa(existente, novoValor, aplicarNasDemaisPendentes);
+		}
 		Parcelamento compra = existente.getParcelamento();
 		if (compra == null) {
 			return 0;
@@ -104,6 +147,28 @@ public class CadastroDespesas {
 			despesas.saveAll(parcelas);
 		}
 		recalcularTotal(compra, parcelas);
+		return alteradas;
+	}
+
+	/**
+	 * Despesa fixa: com {@code aplicar}, o novo valor passa a valer para os
+	 * próximos meses (os já lançados e ainda pendentes, e os que serão lançados).
+	 * Meses anteriores nunca mudam.
+	 */
+	private int aplicarNaFixa(Despesa existente, double novoValor, boolean aplicar) {
+		if (!aplicar) {
+			return 0;
+		}
+		Recorrencia fixa = existente.getRecorrencia();
+		fixa.setValor(novoValor);
+		recorrencias.save(fixa);
+		int alteradas = 0;
+		for (Despesa outra : despesas.findByRecorrenciaAndVencimentoAfterAndPagoFalse(fixa, existente.getVencimento())) {
+			if (emCentavos(outra.getValor()).compareTo(emCentavos(novoValor)) != 0) {
+				outra.setValor(novoValor);
+				alteradas++;
+			}
+		}
 		return alteradas;
 	}
 

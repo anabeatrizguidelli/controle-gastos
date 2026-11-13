@@ -138,6 +138,17 @@
 		setTimeout(() => botao.disabled = true, 0);
 	}));
 
+	// Despesa fixa não é parcelada: marcar "fixa" volta para 1 parcela e trava o campo.
+	const fixa = $('[data-fixa]'), qtdParcelas = $('#quantidadeParcelas'), dicaFixa = $('[data-fixa-dica]');
+	if (fixa && qtdParcelas) {
+		const travar = () => {
+			if (fixa.checked) { qtdParcelas.value = '1'; qtdParcelas.dispatchEvent(new Event('input')); }
+			qtdParcelas.disabled = fixa.checked;
+			if (dicaFixa) dicaFixa.hidden = !fixa.checked;
+		};
+		fixa.addEventListener('change', travar); travar();
+	}
+
 	// Prévia das parcelas: "3x: 1x de R$ 33,34 e 2x de R$ 33,33".
 	const qtd = $('#quantidadeParcelas'), valor = $('#valor'), previa = $('#previa-parcelas');
 	if (qtd && valor && previa) {

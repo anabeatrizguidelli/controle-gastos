@@ -18,7 +18,12 @@
 			th:data-valor-original="${valorOriginal}">
 			<input type="hidden" name="chaveFormulario" th:if="${idEdicao == null}" th:value="${chaveFormulario}">
 			<input type="hidden" id="aplicarDemaisPendentes" name="aplicarDemaisPendentes" value="false"
-				th:if="${idEdicao != null and outrasPendentes > 0}">
+				th:if="${idEdicao != null and perguntarDemais}">
+			<p class="info-parcela" th:if="${original != null and original.fixa}">
+				<span class="selo-fixa">Fixa</span>
+				<span class="status" th:classappend="${original.pago} ? 'pago' : 'pendente'" th:text="${original.status}">Pendente</span>
+				<span>Despesa fixa mensal. As alterações valem só para este mês; se mudar o valor, você poderá aplicá-lo aos próximos meses.</span>
+			</p>
 			<p class="info-parcela" th:if="${original != null and original.parcelada}"
 				th:with="compra=${original.parcelamento}">
 				<span class="status" th:classappend="${original.pago} ? 'pago' : 'pendente'" th:text="${original.status}">Pendente</span>
@@ -56,6 +61,10 @@
 			</div>
 			<p class="suave dica-campo" th:if="${idEdicao == null}">As demais parcelas vencem no mesmo dia dos meses seguintes
 				(no último dia, quando o mês for mais curto). Cada parcela começa como <strong>Pendente</strong>.</p>
+			<label class="opcao" th:if="${idEdicao == null}"><input type="checkbox" id="fixa" name="fixa" value="true" th:checked="${fixa}"
+				data-fixa>Despesa fixa (repete todo mês)</label>
+			<p class="suave dica-campo" th:if="${idEdicao == null}" data-fixa-dica th:hidden="${!fixa}">A despesa fixa é lançada todo mês,
+				no mesmo dia do vencimento, até você encerrá-la. Cada mês começa como <strong>Pendente</strong> e os meses anteriores ficam no histórico.</p>
 			<div class="rotulo">
 				<label for="categoria">Categoria</label>
 				<div class="com-botao">
@@ -76,9 +85,14 @@
 
 		<div class="form-acoes" th:if="${idEdicao != null}">
 			<form th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
-				th:data-confirmar="${original != null and original.parcelada} ? 'Excluir só esta parcela? As outras continuam lançadas.' : 'Excluir esta despesa? Essa ação não pode ser desfeita.'">
+				th:data-confirmar="${original != null and original.parcelada} ? 'Excluir só esta parcela? As outras continuam lançadas.' : (${original != null and original.fixa} ? 'Excluir só o lançamento deste mês? A despesa fixa continua nos próximos meses.' : 'Excluir esta despesa? Essa ação não pode ser desfeita.')">
 				<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block><th:block
-					th:text="${original != null and original.parcelada} ? 'Excluir esta parcela' : 'Excluir despesa'">Excluir despesa</th:block></button>
+					th:text="${original != null and original.parcelada} ? 'Excluir esta parcela' : (${original != null and original.fixa} ? 'Excluir só este mês' : 'Excluir despesa')">Excluir despesa</th:block></button>
+			</form>
+			<form th:if="${original != null and original.fixa}" th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
+				th:data-confirmar="'Encerrar a despesa fixa &quot;' + ${original.descricao} + '&quot; a partir deste mês? Ela deixa de ser lançada nos próximos meses; os meses anteriores continuam no histórico.'">
+				<input type="hidden" name="encerrar" value="true">
+				<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Encerrar despesa fixa</button>
 			</form>
 			<form th:if="${original != null and original.parcelamento != null}" th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
 				th:data-confirmar="'Excluir todas as parcelas de &quot;' + ${original.descricao} + '&quot;? Essa ação não pode ser desfeita.'">
@@ -89,6 +103,19 @@
 		</div>
 	</main>
 </div>
+
+<dialog id="dlg-demais-parcelas" th:if="${idEdicao != null and perguntarDemais and original.fixa}" aria-labelledby="t-dlg-fixa">
+	<div class="dl">
+		<div class="dl-topo"><h2 id="t-dlg-fixa">Alterar os próximos meses?</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<p>Deseja aplicar este novo valor aos próximos meses desta despesa fixa?</p>
+		<p class="suave"><strong>Sim:</strong> os próximos meses pendentes (e os que ainda serão lançados) passam a valer
+			<strong class="mono" data-novo-valor>R$ 0,00</strong>.<br>
+			<strong>Não:</strong> só este mês muda; os próximos mantêm o valor atual.<br>
+			Meses anteriores e meses já pagos não são alterados.</p>
+		<div class="form-acoes"><button class="btn btn-p" type="button" data-aplicar="true">Sim, alterar os próximos</button><button class="btn" type="button" data-aplicar="false">Não, só este mês</button></div>
+	</div>
+</dialog>
 
 <dialog id="dlg-demais-parcelas" th:if="${idEdicao != null and outrasPendentes > 0}" aria-labelledby="t-dlg-parcelas">
 	<div class="dl">

@@ -225,6 +225,10 @@ label.opcao { flex-direction: row; align-items: center; gap: 10px; min-height: 4
 .form-linha label.opcao { margin-top: 24px; }
 label.opcao input { width: 18px; height: 18px; margin: 0; padding: 0; flex: none; accent-color: var(--terracota-500); cursor: pointer; box-shadow: none; }
 label.opcao:has(input:checked) { border-color: var(--terracota-300); }
+/* Selo discreto de despesa fixa (mensal). */
+.selo-fixa { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 99px; border: 1px solid var(--capim-300); background: var(--capim-100); color: var(--capim-700); font-size: .66rem; font-weight: 600; line-height: 1.5; vertical-align: 1px; }
+:root[data-theme="dark"] .selo-fixa { background: rgba(53, 68, 56, .5); border-color: var(--capim-700); color: var(--capim-200); }
+.info-parcela .selo-fixa { margin-left: 0; }
 
 /* ---------- avisos ---------- */
 .aviso { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 14px; border: 1px solid; font-size: .875rem; font-weight: 500; }
