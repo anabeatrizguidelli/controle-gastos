@@ -73,6 +73,9 @@ class FuncionalidadesTests {
 		mvc.perform(get("/painel")).andExpect(status().is3xxRedirection())
 				.andExpect(redirectedUrl("/login"));
 		mvc.perform(get("/login")).andExpect(status().isOk()).andExpect(content().string(containsString("Entrar")));
+		// A tela de login não divulga a conta de demonstração.
+		mvc.perform(get("/login")).andExpect(content().string(not(containsString(DadosIniciais.EMAIL_DEMO))))
+				.andExpect(content().string(not(containsString(DadosIniciais.SENHA_DEMO))));
 	}
 
 	@Test
