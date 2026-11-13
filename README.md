@@ -133,3 +133,4 @@ Evidências do teste (JSON e prints) em [`docs/evidencias/`](docs/evidencias).
 Os diagramas UML (abrir em https://app.diagrams.net) estão em [`docs/`](docs):
 - `diagrama-de-classes.drawio`: diagrama de classes do projeto.
 - `casos-de-uso-e-classes.drawio`: casos de uso e uma versão detalhada das classes.
+- [`dicionario-de-dados.md`](docs/dicionario-de-dados.md): dicionário de dados das tabelas do banco, com cada campo e o que ele faz.
