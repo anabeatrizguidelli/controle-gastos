@@ -8,8 +8,9 @@ Aplicação web para estudantes universitários acompanharem os próprios gastos
 - Java 21 e Spring Boot 4 (Web MVC, Thymeleaf, Data JPA, Validation, Security)
 - HTML e CSS
 - JavaScript
-- Banco H2 (em arquivo)
+- Banco H2 (em arquivo) no desenvolvimento e PostgreSQL (Supabase) em produção
 - Maven (via Maven Wrapper — não precisa instalar)
+- Docker, Render, Supabase e Brevo (detalhes em [Serviços externos](#serviços-externos))
 
 ## Integrantes
 - Ana Beatriz Guidelli
@@ -31,6 +32,32 @@ Aplicação web para estudantes universitários acompanharem os próprios gastos
 **Não funcionais**
 - RNF1. Interface legível em tela de celular.
 - RNF2. Valores monetários no formato R$ 0,00.
+
+**Implementados além do escopo original**
+
+Os requisitos acima são os definidos no início do projeto e continuam valendo. Durante o desenvolvimento o grupo implementou também os itens abaixo, que não estavam previstos.
+
+Funcionais:
+- RF6. Criar conta e entrar com e-mail ou nome de usuário e senha; cada pessoa só vê os próprios dados.
+- RF7. Confirmar o e-mail da conta nova com um código de 6 dígitos enviado por e-mail.
+- RF8. Recuperar a senha ("esqueci minha senha") com um código enviado ao e-mail cadastrado.
+- RF9. Gerenciar categorias (com limite mensal opcional) e fontes de receita: criar, editar, excluir e listar, com cadastro rápido no formulário de lançamento. Contas novas já começam com categorias e fontes padrão.
+- RF10. Editar e excluir despesas e receitas, com confirmação antes de excluir.
+- RF11. Registrar compra parcelada (até 120 parcelas mensais), com os centavos distribuídos entre as parcelas e opção de alterar o valor só de uma parcela ou também das demais pendentes, e de excluir uma parcela ou a compra inteira.
+- RF12. Registrar despesas e receitas fixas, lançadas automaticamente todo mês (até 12 meses à frente), com alteração "só este mês" ou "os próximos meses" e encerramento.
+- RF13. Informar o vencimento da despesa e marcá-la como paga ou pendente.
+- RF14. Mostrar o saldo do mês anterior, o saldo disponível e o saldo projetado para o fim do mês, considerando as despesas pendentes.
+- RF15. Painel com gráfico de pizza por categoria, barras de gasto x limite, histórico dos últimos 6 meses e navegação entre meses.
+- RF16. Sugestões de economia: onde mais gasta, comparação com o mês anterior, limites perto do fim, previsão até o fim do mês e pequenos gastos que se acumulam.
+- RF17. API JSON autenticada para consultar e cadastrar despesas, receitas, categorias e fontes e marcar pagamentos.
+
+Não funcionais:
+- RNF3. Segurança: senhas com BCrypt; códigos de verificação guardados só como hash SHA-256, válidos por 15 minutos, de uso único, com até 5 tentativas e reenvio a cada 60 segundos; proteção CSRF nos formulários.
+- RNF4. Modo claro e modo escuro, com a escolha salva no navegador.
+- RNF5. Aplicação publicada na nuvem: Docker no Render e banco PostgreSQL no Supabase, com senhas e chaves só em variáveis de ambiente.
+- RNF6. E-mail enviado pela API HTTP da Brevo (o plano gratuito do Render bloqueia SMTP); sem provedor configurado em produção, os recursos que dependem de e-mail ficam desligados.
+- RNF7. Testes automatizados com banco em memória separado, sem mexer nos dados locais.
+- RNF8. Proteção contra envio duplicado de formulário (clique duplo) e contra lançamento repetido das despesas e receitas fixas.
 
 ## Como executar
 
@@ -76,6 +103,7 @@ A API usa o mesmo login (HTTP Basic) e só devolve os dados do usuário autentic
 | GET | `/api/despesas` | Lista as despesas |
 | GET | `/api/despesas/{id}` | Uma despesa (404 se não existir ou for de outro usuário) |
 | POST | `/api/despesas` | Cadastra uma despesa (201) |
+| PUT | `/api/despesas/{id}/pagamento` | Marca (`{"pago": true}`) ou desmarca (`{"pago": false}`) o pagamento |
 | GET | `/api/receitas` | Lista as receitas |
 | GET | `/api/receitas/{id}` | Uma receita |
 | GET/POST | `/api/categorias` | Lista / cria categorias |
@@ -124,13 +152,27 @@ O registro da validação funcional de 13/11/2026 (inicialização, testes autom
 - [x] Edição e exclusão de despesas e receitas
 - [x] Painel com totais por categoria, total do mês, saldo e histórico (RF4)
 - [x] Alertas de 80% e 100% do limite (RF5)
-- [ ] Atualizar o diagrama de classes com `Usuario` e `Fonte`
+- [x] Atualizar o diagrama de classes com `Usuario`, `Fonte` e as classes novas
+- [x] Registrar os requisitos implementados além do escopo original (RF6 a RF17, RNF3 a RNF8)
 
 Evidências do teste (JSON e prints) em [`docs/evidencias/`](docs/evidencias).
 
 ## Documentação
 
 Os diagramas UML (abrir em https://app.diagrams.net) estão em [`docs/`](docs):
-- `diagrama-de-classes.drawio`: diagrama de classes do projeto.
-- `casos-de-uso-e-classes.drawio`: casos de uso e uma versão detalhada das classes.
+- `diagrama-de-classes.drawio`: diagrama de classes do projeto, atualizado com o código atual. Tem duas páginas: "Diagrama de Classes" (classes de domínio e `ControleGastos`) e "Serviços" (camada de serviços e envio de e-mail). Imagens: [`diagrama-de-classes.png`](docs/diagrama-de-classes.png) e [`diagrama-de-servicos.png`](docs/diagrama-de-servicos.png).
+- `casos-de-uso-e-classes.drawio`: casos de uso e a versão detalhada das classes feita no início do projeto (proposta original).
 - [`dicionario-de-dados.md`](docs/dicionario-de-dados.md): dicionário de dados das tabelas do banco, com cada campo e o que ele faz.
+- [`servicos-externos.md`](docs/servicos-externos.md): serviços e tecnologias externas (GitHub, Render, Supabase, Brevo e bibliotecas).
+
+## Serviços externos
+
+| Serviço | Para que usamos |
+|---|---|
+| GitHub | Código-fonte, histórico, documentação e revisão por pull request. A branch `deploy-render` é a publicada. |
+| Render | Hospeda a aplicação na internet, construída com Docker a partir do `Dockerfile`. |
+| Supabase | Banco PostgreSQL de produção (região São Paulo, conexão com SSL). |
+| Brevo | Envio dos e-mails com os códigos de confirmação de conta e de recuperação de senha, pela API HTTP. |
+| Google Fonts | Fontes do visual (Plus Jakarta Sans e JetBrains Mono). |
+
+Localmente nada disso é necessário: o banco é o H2 em arquivo e os e-mails aparecem no log. Senhas e chaves de produção ficam só nas variáveis de ambiente do Render. Detalhes, variáveis usadas e bibliotecas em [`docs/servicos-externos.md`](docs/servicos-externos.md).
