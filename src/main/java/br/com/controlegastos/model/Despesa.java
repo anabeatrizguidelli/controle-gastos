@@ -17,7 +17,15 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * Despesa registrada pelo estudante (RF1).
+ * Despesa registrada pelo estudante (RF1). Cada registro é um lançamento com
+ * vencimento próprio: uma despesa à vista ou uma parcela de uma compra
+ * parcelada ({@link Parcelamento}).
+ * <p>
+ * Os campos {@code vencimento}, {@code pago}, {@code numeroParcela},
+ * {@code totalParcelas} e {@code parcelamento} foram adicionados depois e
+ * aceitam nulo no banco, para que os registros antigos continuem valendo:
+ * sem vencimento, vale a data da despesa; sem status, a despesa antiga conta
+ * como paga (era assim que o saldo já a considerava).
  */
 @Entity
 public class Despesa {
@@ -29,12 +37,32 @@ public class Despesa {
 	@NotBlank(message = "Informe a descrição")
 	private String descricao;
 
+	/** Valor deste lançamento (numa compra parcelada, o valor da parcela). */
 	@Positive(message = "O valor deve ser maior que zero")
 	private double valor;
 
+	/** Data da compra / do lançamento. */
 	@NotNull(message = "Informe a data")
 	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 	private LocalDate data;
+
+	/** Data de vencimento; define em qual mês o lançamento aparece. Nulo nos registros antigos. */
+	@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+	private LocalDate vencimento;
+
+	/** {@code true} = Pago, {@code false} = Pendente, nulo = registro antigo (conta como pago). */
+	private Boolean pago;
+
+	/** Número desta parcela (1, 2, 3...). Nulo nas despesas à vista. */
+	private Integer numeroParcela;
+
+	/** Quantidade total de parcelas da compra. Nulo nas despesas à vista. */
+	private Integer totalParcelas;
+
+	/** Compra parcelada à qual esta parcela pertence. Nulo nas despesas à vista. */
+	@JsonIgnore
+	@ManyToOne
+	private Parcelamento parcelamento;
 
 	@NotNull(message = "Escolha uma categoria")
 	@ManyToOne
@@ -60,8 +88,44 @@ public class Despesa {
 		this.usuario = usuario;
 	}
 
+	/** O mês do lançamento é o mês do vencimento. */
 	public boolean pertenceAoMes(int mes, int ano) {
-		return data != null && data.getMonthValue() == mes && data.getYear() == ano;
+		LocalDate v = getVencimento();
+		return v != null && v.getMonthValue() == mes && v.getYear() == ano;
+	}
+
+	/** Liga esta despesa a uma compra parcelada como a parcela {@code numero} de {@code total}. */
+	public void vincularParcela(Parcelamento parcelamento, int numero, int total) {
+		this.parcelamento = parcelamento;
+		this.numeroParcela = numero;
+		this.totalParcelas = total;
+	}
+
+	/** Remove qualquer informação de parcela (usado em despesas à vista). */
+	public void desvincularParcela() {
+		this.parcelamento = null;
+		this.numeroParcela = null;
+		this.totalParcelas = null;
+	}
+
+	public boolean isParcelada() {
+		return totalParcelas != null && totalParcelas > 1;
+	}
+
+	/** Ex.: "3/14" ou "À vista". */
+	@JsonIgnore
+	public String getRotuloParcela() {
+		return isParcelada() ? numeroParcela + "/" + totalParcelas : "À vista";
+	}
+
+	/** "Pago" ou "Pendente". */
+	public String getStatus() {
+		return isPago() ? "Pago" : "Pendente";
+	}
+
+	/** Verdadeiro quando o pagamento ainda não foi informado (nem pago, nem pendente). */
+	public boolean pagamentoNaoInformado() {
+		return pago == null;
 	}
 
 	public Integer getId() {
@@ -90,6 +154,42 @@ public class Despesa {
 
 	public void setData(LocalDate data) {
 		this.data = data;
+	}
+
+	/** Vencimento do lançamento; nos registros antigos (sem vencimento) é a própria data. */
+	public LocalDate getVencimento() {
+		return vencimento != null ? vencimento : data;
+	}
+
+	public void setVencimento(LocalDate vencimento) {
+		this.vencimento = vencimento;
+	}
+
+	/** Registros antigos, sem status, contam como pagos. */
+	public boolean isPago() {
+		return pago == null || pago;
+	}
+
+	public void setPago(Boolean pago) {
+		this.pago = pago;
+	}
+
+	public Integer getNumeroParcela() {
+		return numeroParcela;
+	}
+
+	public Integer getTotalParcelas() {
+		return totalParcelas;
+	}
+
+	@JsonIgnore
+	public Parcelamento getParcelamento() {
+		return parcelamento;
+	}
+
+	/** Id da compra parcelada (aparece na API); nulo nas despesas à vista. */
+	public Integer getParcelamentoId() {
+		return parcelamento == null ? null : parcelamento.getId();
 	}
 
 	public Categoria getCategoria() {

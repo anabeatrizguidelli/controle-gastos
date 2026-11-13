@@ -5,9 +5,13 @@
 <head th:fragment="head(titulo)">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title th:text="${titulo} + ' · Controle de Gastos'">Controle de Gastos</title>
-	<!-- Aplica o tema salvo antes de desenhar a página (evita piscar). -->
+	<title th:text="${titulo} + ' · Finora'">Finora</title>
+	<!-- Aplica o tema salvo antes de desenhar a página (evita piscar). Sem escolha salva, vale o modo claro. -->
 	<script>try { var t = localStorage.getItem("tema"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+	<!-- Fontes do visual Finora (Google Fonts, sem chave): Plus Jakarta Sans e JetBrains Mono. -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap">
 	<link rel="stylesheet" th:href="@{/estilo.css}">
 	<script th:src="@{/app.js}" defer></script>
 </head>
@@ -17,7 +21,7 @@
 <aside th:fragment="menu(ativo)" class="lateral painel">
 	<div class="marca">
 		<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
-		<span><strong>Controle de Gastos</strong><small th:text="${usuarioNome}">Estudante</small></span>
+		<span><strong>Finora</strong><small th:text="${usuarioNome}">Estudante</small></span>
 	</div>
 	<nav class="menu" aria-label="Menu principal">
 		<a th:href="@{/painel}" th:classappend="${ativo == 'painel'} ? 'ativo'" th:aria-current="${ativo == 'painel'} ? 'page'">
@@ -41,8 +45,8 @@
 
 <!-- Alterna entre modo escuro e modo claro (app.js guarda a escolha). -->
 <button th:fragment="botaoTema(classe)" type="button" class="btn" th:classappend="${classe}" data-tema aria-label="Alternar entre modo escuro e modo claro">
-	<span data-tema-escuro><th:block th:replace="~{fragmentos :: icone('sol')}"></th:block><span class="t">Modo claro</span></span>
-	<span data-tema-claro hidden><th:block th:replace="~{fragmentos :: icone('lua')}"></th:block><span class="t">Modo escuro</span></span>
+	<span data-tema-escuro hidden><th:block th:replace="~{fragmentos :: icone('sol')}"></th:block><span class="t">Modo claro</span></span>
+	<span data-tema-claro><th:block th:replace="~{fragmentos :: icone('lua')}"></th:block><span class="t">Modo escuro</span></span>
 </button>
 
 <th:block th:fragment="avisos">
@@ -58,11 +62,11 @@
 	<span th:text="${@fmt.mes(mes)}">Outubro de 2026</span>
 	<a th:href="@{${url}(mes=${mes.plusMonths(1)})}" title="Próximo mês" aria-label="Próximo mês">
 		<th:block th:replace="~{fragmentos :: icone('proximo')}"></th:block></a>
-	<a th:href="@{${url}}" title="Voltar ao mês atual" aria-label="Voltar ao mês atual" style="border-left:1px solid var(--borda)">
+	<a th:href="@{${url}}" title="Voltar ao mês atual" aria-label="Voltar ao mês atual">
 		<th:block th:replace="~{fragmentos :: icone('hoje')}"></th:block></a>
 </nav>
 
-<!-- Ícones (traço simples, mesmo estilo do protótipo) -->
+<!-- Ícones (traço simples, no estilo Lucide do protótipo) -->
 <th:block th:fragment="icone(nome)" th:switch="${nome}">
 	<svg th:case="'carteira'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h12v4"/><path d="M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2z"/><circle cx="16" cy="14" r="1"/></svg>
 	<svg th:case="'painel'" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
@@ -76,6 +80,7 @@
 	<svg th:case="'tendencia'" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 17 6-6 4 4 8-8M15 7h6v6"/></svg>
 	<svg th:case="'ok'" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg>
 	<svg th:case="'sair'" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+	<svg th:case="'seta'" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
 	<svg th:case="'mais'" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
 	<svg th:case="'editar'" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/></svg>
 	<svg th:case="'excluir'" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>

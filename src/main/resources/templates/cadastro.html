@@ -7,7 +7,7 @@
 	<section class="cartao painel" aria-labelledby="titulo-cadastro">
 		<div class="marca">
 			<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
-			<span><strong>Controle de Gastos</strong><small>Finanças do estudante</small></span>
+			<span><strong>Finora</strong><small>Suas finanças em equilíbrio</small></span>
 		</div>
 		<div>
 			<h1 id="titulo-cadastro">Criar conta</h1>
@@ -33,7 +33,7 @@
 					<input name="confirmacao" type="password" autocomplete="new-password" required minlength="6">
 				</label>
 			</div>
-			<button class="btn btn-p" type="submit">Criar conta</button>
+			<button class="btn btn-p" type="submit"><span>Criar conta</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block></button>
 		</form>
 
 		<p class="suave">Já tem conta? <a th:href="@{/login}">Entrar</a></p>

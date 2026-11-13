@@ -13,24 +13,49 @@
 			</div>
 		</header>
 
-		<form class="form painel" th:object="${despesa}" method="post"
-			th:action="${idEdicao == null} ? @{/despesas} : @{/despesas/{id}(id=${idEdicao})}">
+		<form class="form painel" id="form-despesa" th:object="${despesa}" method="post"
+			th:action="${idEdicao == null} ? @{/despesas} : @{/despesas/{id}(id=${idEdicao})}"
+			th:data-valor-original="${valorOriginal}">
+			<input type="hidden" name="chaveFormulario" th:if="${idEdicao == null}" th:value="${chaveFormulario}">
+			<input type="hidden" id="aplicarDemaisPendentes" name="aplicarDemaisPendentes" value="false"
+				th:if="${idEdicao != null and outrasPendentes > 0}">
+			<p class="info-parcela" th:if="${original != null and original.parcelada}"
+				th:with="compra=${original.parcelamento}">
+				<span class="status" th:classappend="${original.pago} ? 'pago' : 'pendente'" th:text="${original.status}">Pendente</span>
+				<span>Parcela <strong th:text="${original.rotuloParcela}">3/14</strong><th:block th:if="${compra != null}"> de uma compra de
+					<strong class="mono" th:text="${@fmt.moeda(compra.valorTotal)}">R$ 0,00</strong></th:block>.
+					<th:block th:text="${outrasPendentes > 0} ? 'As alterações valem só para esta parcela. Se mudar o valor, você poderá aplicá-lo às demais parcelas pendentes.' : 'As alterações valem só para esta parcela.'">As alterações valem só para esta parcela.</th:block></span>
+			</p>
 			<label>Descrição
 				<input th:field="*{descricao}" placeholder="Ex.: Almoço no RU" autocomplete="off" maxlength="120"
 					th:errorclass="invalido">
 				<span class="erro" th:if="${#fields.hasErrors('descricao')}" th:errors="*{descricao}"></span>
 			</label>
 			<div class="par">
-				<label>Valor (R$)
+				<label><th:block th:text="${idEdicao == null} ? 'Valor total (R$)' : (${original != null and original.parcelada} ? 'Valor da parcela (R$)' : 'Valor (R$)')">Valor total (R$)</th:block>
 					<input id="valor" name="valor" type="number" step="0.01" min="0.01" inputmode="decimal" placeholder="0,00"
 						th:value="${@fmt.campo(despesa.valor)}" th:classappend="${#fields.hasErrors('valor')} ? 'invalido'">
 					<span class="erro" th:if="${#fields.hasErrors('valor')}" th:errors="*{valor}"></span>
 				</label>
-				<label>Data
+				<label th:if="${idEdicao == null}">Quantidade de parcelas
+					<input id="quantidadeParcelas" name="quantidadeParcelas" type="number" min="1" th:max="${maximoParcelas}" step="1"
+						inputmode="numeric" required th:value="${quantidadeParcelas}" th:classappend="${erroParcelas != null} ? 'invalido'">
+					<span class="erro" th:if="${erroParcelas != null}" th:text="${erroParcelas}"></span>
+					<small class="suave dica-campo" id="previa-parcelas" aria-live="polite">1 = à vista</small>
+				</label>
+			</div>
+			<div class="par">
+				<label>Data da compra
 					<input type="date" th:field="*{data}" th:errorclass="invalido">
 					<span class="erro" th:if="${#fields.hasErrors('data')}" th:errors="*{data}"></span>
 				</label>
+				<label><th:block th:text="${idEdicao == null} ? 'Vencimento da 1ª parcela' : 'Vencimento'">Vencimento da 1ª parcela</th:block>
+					<input type="date" th:field="*{vencimento}" required th:errorclass="invalido">
+					<span class="erro" th:if="${#fields.hasErrors('vencimento')}" th:errors="*{vencimento}"></span>
+				</label>
 			</div>
+			<p class="suave dica-campo" th:if="${idEdicao == null}">As demais parcelas vencem no mesmo dia dos meses seguintes
+				(no último dia, quando o mês for mais curto). Cada parcela começa como <strong>Pendente</strong>.</p>
 			<div class="rotulo">
 				<label for="categoria">Categoria</label>
 				<div class="com-botao">
@@ -44,17 +69,39 @@
 				<span class="erro" th:if="${#fields.hasErrors('categoria')}" th:errors="*{categoria}"></span>
 			</div>
 			<div class="form-acoes">
-				<button class="btn btn-p" type="submit" th:text="${idEdicao == null} ? 'Salvar despesa' : 'Salvar alterações'">Salvar despesa</button>
+				<button class="btn btn-p" type="submit" data-enviar-uma-vez th:text="${idEdicao == null} ? 'Salvar despesa' : 'Salvar alterações'">Salvar despesa</button>
 				<a class="btn" th:href="@{/despesas}">Cancelar</a>
 			</div>
 		</form>
 
-		<form th:if="${idEdicao != null}" th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
-			data-confirmar="Excluir esta despesa? Essa ação não pode ser desfeita.">
-			<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block>Excluir despesa</button>
-		</form>
+		<div class="form-acoes" th:if="${idEdicao != null}">
+			<form th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
+				th:data-confirmar="${original != null and original.parcelada} ? 'Excluir só esta parcela? As outras continuam lançadas.' : 'Excluir esta despesa? Essa ação não pode ser desfeita.'">
+				<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block><th:block
+					th:text="${original != null and original.parcelada} ? 'Excluir esta parcela' : 'Excluir despesa'">Excluir despesa</th:block></button>
+			</form>
+			<form th:if="${original != null and original.parcelamento != null}" th:action="@{/despesas/{id}/excluir(id=${idEdicao})}" method="post"
+				th:data-confirmar="'Excluir todas as parcelas de &quot;' + ${original.descricao} + '&quot;? Essa ação não pode ser desfeita.'">
+				<input type="hidden" name="todas" value="true">
+				<button class="btn btn-perigo" type="submit"><th:block th:replace="~{fragmentos :: icone('excluir')}"></th:block><th:block
+					th:text="'Excluir todas as ' + ${original.totalParcelas} + ' parcelas'">Excluir todas as parcelas</th:block></button>
+			</form>
+		</div>
 	</main>
 </div>
+
+<dialog id="dlg-demais-parcelas" th:if="${idEdicao != null and outrasPendentes > 0}" aria-labelledby="t-dlg-parcelas">
+	<div class="dl">
+		<div class="dl-topo"><h2 id="t-dlg-parcelas">Alterar as demais parcelas?</h2>
+			<button type="button" class="x" data-fechar aria-label="Fechar"><th:block th:replace="~{fragmentos :: icone('fechar')}"></th:block></button></div>
+		<p>Deseja aplicar este novo valor às demais parcelas pendentes?</p>
+		<p class="suave"><strong>Sim:</strong> <th:block th:text="${outrasPendentes == 1} ? 'a outra parcela pendente passa' : ('as outras ' + ${outrasPendentes} + ' parcelas pendentes passam')">as outras parcelas pendentes passam</th:block>
+			a valer <strong class="mono" data-novo-valor>R$ 0,00</strong>.<br>
+			<strong>Não:</strong> só esta parcela muda; as demais mantêm o valor atual.<br>
+			Parcelas já pagas não são alteradas.</p>
+		<div class="form-acoes"><button class="btn btn-p" type="button" data-aplicar="true">Sim, alterar as pendentes</button><button class="btn" type="button" data-aplicar="false">Não, só esta parcela</button></div>
+	</div>
+</dialog>
 
 <dialog id="dlg-categoria" aria-labelledby="t-dlg-cat">
 	<form class="dl" data-api="/api/categorias" data-select="categoria" data-sucesso="Categoria &quot;{nome}&quot; criada e selecionada.">

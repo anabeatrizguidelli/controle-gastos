@@ -26,8 +26,11 @@ import br.com.controlegastos.repository.ReceitaRepository;
 @Service
 public class ControleGastos {
 
-	/** Mesma paleta do protótipo visual; a cor de cada categoria é fixa pelo id. */
-	private static final String[] CORES = { "#2563eb", "#16a34a", "#9333ea", "#0891b2", "#db2777", "#64748b" };
+	/**
+	 * Cores das categorias na paleta Capim de Cheiro & Terracota, escolhidas pelo id (id % 6). As categorias
+	 * iniciais ficam como no protótipo: Alimentação (1) terracota, Transporte (2) musgo e Lazer (3) sálvia.
+	 */
+	private static final String[] CORES = { "#B08A3E", "#C86D51", "#4A5D4E", "#5F7363", "#954731", "#8E9E89" };
 
 	private final DespesaRepository despesas;
 	private final ReceitaRepository receitas;
@@ -44,7 +47,7 @@ public class ControleGastos {
 	}
 
 	public List<Despesa> listarDespesas(Usuario usuario, YearMonth mes) {
-		return despesas.findByUsuarioAndDataBetweenOrderByDataDescIdDesc(usuario, mes.atDay(1), mes.atEndOfMonth());
+		return despesas.listarPorVencimento(usuario, mes.atDay(1), mes.atEndOfMonth());
 	}
 
 	public List<Receita> listarReceitas(Usuario usuario, YearMonth mes) {
@@ -60,25 +63,35 @@ public class ControleGastos {
 		return somarDespesas(listarDespesas(usuario, YearMonth.of(ano, mes)));
 	}
 
+	/** Despesas do mês já pagas (as que saem do saldo disponível). */
+	public double totalDespesasPagasMes(Usuario usuario, int mes, int ano) {
+		return somarDespesas(listarDespesas(usuario, YearMonth.of(ano, mes)).stream().filter(Despesa::isPago).toList());
+	}
+
+	/** Despesas do mês ainda pendentes (compromissos que ainda não saíram do saldo). */
+	public double totalDespesasPendentesMes(Usuario usuario, int mes, int ano) {
+		return somarDespesas(listarDespesas(usuario, YearMonth.of(ano, mes)).stream().filter(d -> !d.isPago()).toList());
+	}
+
 	public double totalReceitasMes(Usuario usuario, int mes, int ano) {
 		return somarReceitas(listarReceitas(usuario, YearMonth.of(ano, mes)));
 	}
 
-	/** Resultado só do mês: receitas − despesas do mês. */
+	/** Resultado só do mês: receitas − despesas pagas do mês (as pendentes não reduzem o saldo). */
 	public double calcularSaldo(Usuario usuario, int mes, int ano) {
-		return totalReceitasMes(usuario, mes, ano) - totalDespesasMes(usuario, mes, ano);
+		return totalReceitasMes(usuario, mes, ano) - totalDespesasPagasMes(usuario, mes, ano);
 	}
 
 	/**
-	 * Saldo que sobrou de todos os meses anteriores (receitas − despesas lançadas
+	 * Saldo que sobrou de todos os meses anteriores (receitas − despesas pagas com vencimento
 	 * antes do dia 1º do mês). É o valor com que o mês começa.
 	 */
 	public double saldoAnterior(Usuario usuario, int mes, int ano) {
 		LocalDate inicio = LocalDate.of(ano, mes, 1);
-		return receitas.somarAntesDe(usuario, inicio) - despesas.somarAntesDe(usuario, inicio);
+		return receitas.somarAntesDe(usuario, inicio) - despesas.somarPagasAntesDe(usuario, inicio);
 	}
 
-	/** Saldo disponível: o que sobrou dos meses anteriores + receitas − despesas do mês. */
+	/** Saldo disponível: o que sobrou dos meses anteriores + receitas − despesas pagas do mês. */
 	public double saldoDisponivel(Usuario usuario, int mes, int ano) {
 		return saldoAnterior(usuario, mes, ano) + calcularSaldo(usuario, mes, ano);
 	}
