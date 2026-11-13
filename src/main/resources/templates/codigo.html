@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos :: head(${etapa == 'confirmar' ? 'Confirmar e-mail' : 'Recuperar senha'})}"></head>
+<body>
+<th:block th:replace="~{fragmentos :: botaoTema('tema-flutuante')}"></th:block>
+<main class="entrada">
+	<section class="cartao painel" aria-labelledby="titulo-codigo">
+		<div class="marca">
+			<span class="marca-icone"><th:block th:replace="~{fragmentos :: icone('carteira')}"></th:block></span>
+			<span><strong>Finora</strong><small>Suas finanças em equilíbrio</small></span>
+		</div>
+
+		<div th:switch="${etapa}">
+			<th:block th:case="'confirmar'">
+				<h1 id="titulo-codigo">Confirme seu e-mail</h1>
+				<p class="suave">Digite o código de 6 dígitos que enviamos para o seu e-mail. Ele vale por 15 minutos.</p>
+			</th:block>
+			<th:block th:case="'esqueci'">
+				<h1 id="titulo-codigo">Esqueci minha senha</h1>
+				<p class="suave">Informe seu e-mail ou nome de usuário. Se a conta existir, enviamos um código para o e-mail dela.</p>
+			</th:block>
+			<th:block th:case="*">
+				<h1 id="titulo-codigo">Nova senha</h1>
+				<p class="suave">Digite o código recebido por e-mail e escolha a nova senha.</p>
+			</th:block>
+		</div>
+
+		<div class="aviso falha" role="alert" th:if="${param.pendente}">
+			<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block>Confirme seu e-mail para entrar.
+		</div>
+		<div class="aviso sucesso" role="status" th:if="${sucesso}" th:text="${sucesso}">Código enviado.</div>
+		<div class="aviso falha" role="alert" th:if="${erro}">
+			<th:block th:replace="~{fragmentos :: icone('alerta')}"></th:block><span th:text="${erro}">Erro</span>
+		</div>
+
+		<form th:if="${etapa == 'esqueci'}" th:action="@{/senha/esqueci}" method="post">
+			<label>E-mail ou nome de usuário
+				<input name="login" th:value="${login}" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+			</label>
+			<button class="btn btn-p" type="submit"><span>Enviar código</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block></button>
+		</form>
+
+		<form th:unless="${etapa == 'esqueci'}" th:action="${etapa == 'confirmar'} ? @{/confirmar} : @{/senha/redefinir}" method="post">
+			<label th:if="${login == ''}">E-mail ou nome de usuário
+				<input name="login" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+			</label>
+			<input th:unless="${login == ''}" type="hidden" name="login" th:value="${login}">
+			<p class="suave" th:unless="${login == ''}">Conta: <strong class="mono" th:text="${login}">voce@exemplo.com</strong></p>
+			<label>Código
+				<input name="codigo" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9 ]{6,7}" maxlength="7"
+					placeholder="000000" class="mono" required autofocus>
+			</label>
+			<div class="par" th:if="${etapa == 'redefinir'}">
+				<label>Nova senha
+					<input name="senha" type="password" autocomplete="new-password" required minlength="6" placeholder="Mín. 6 caracteres">
+				</label>
+				<label>Confirmar senha
+					<input name="confirmacao" type="password" autocomplete="new-password" required minlength="6">
+				</label>
+			</div>
+			<button class="btn btn-p" type="submit">
+				<span th:text="${etapa == 'confirmar'} ? 'Confirmar' : 'Salvar nova senha'">Confirmar</span><th:block th:replace="~{fragmentos :: icone('seta')}"></th:block>
+			</button>
+		</form>
+
+		<form th:unless="${etapa == 'esqueci' or login == ''}" method="post"
+			th:action="${etapa == 'confirmar'} ? @{/confirmar/reenviar} : @{/senha/esqueci}">
+			<input type="hidden" name="login" th:value="${login}">
+			<button class="btn" type="submit">Reenviar código</button>
+		</form>
+
+		<p class="suave"><a th:href="@{/login}">Voltar para o login</a></p>
+		<p class="dica" th:if="${modoDev}">Modo desenvolvimento: nenhum e-mail sai de verdade; o código aparece no log do app.</p>
+	</section>
+</main>
+</body>
+</html>

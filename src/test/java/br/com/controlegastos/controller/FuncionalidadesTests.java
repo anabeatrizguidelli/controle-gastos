@@ -91,19 +91,21 @@ class FuncionalidadesTests {
 
 	@Test
 	void cadastroDeContaValidaOsCampos() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("email", "ana@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("usuario", "ana").param("email", "ana@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "654321"))
 				.andExpect(status().isOk()).andExpect(content().string(containsString("As senhas não conferem.")));
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("email", DadosIniciais.EMAIL_DEMO)
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Ana").param("usuario", "ana").param("email", DadosIniciais.EMAIL_DEMO)
 				.param("senha", "123456").param("confirmacao", "123456"))
 				.andExpect(content().string(containsString("Já existe uma conta com esse e-mail.")));
 	}
 
 	@Test
 	void cadaUsuarioVeSomenteOsPropriosRegistros() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Bia").param("email", "bia@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Bia").param("usuario", "bia").param("email", "bia@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "123456"))
-				.andExpect(redirectedUrl("/login"));
+				.andExpect(status().is3xxRedirection());
+		// A confirmação do e-mail por código é testada em ContaTests; aqui a conta já entra confirmada.
+		usuarios.findByEmailIgnoreCase("bia@exemplo.com").orElseThrow().setEmailConfirmado(true);
 		Integer despesaDaDemo = despesas.findByUsuarioOrderByDataDescIdDesc(demo()).get(0).getId();
 
 		mvc.perform(get("/api/despesas").with(httpBasic("bia@exemplo.com", "123456")))
@@ -301,7 +303,7 @@ class FuncionalidadesTests {
 
 	@Test
 	void naoAceitaCategoriaDeOutroUsuario() throws Exception {
-		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Caio").param("email", "caio@exemplo.com")
+		mvc.perform(post("/cadastro").with(csrf()).param("nome", "Caio").param("usuario", "caio").param("email", "caio@exemplo.com")
 				.param("senha", "123456").param("confirmacao", "123456"));
 		Categoria doCaio = categorias.findByUsuarioOrderByNomeAsc(usuarios.findByEmailIgnoreCase("caio@exemplo.com").orElseThrow()).get(0);
 		mvc.perform(post("/despesas").with(DEMO).with(csrf()).param("descricao", "Teste").param("valor", "10")
